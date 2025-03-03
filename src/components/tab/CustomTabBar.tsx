@@ -3,6 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { DEVICE_WIDTH } from "@/utils/device";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { router } from "expo-router";
 import React, { FC } from "react";
 import { TouchableOpacity, View } from "react-native";
 import {
@@ -18,68 +19,76 @@ import Animated, {
 } from "react-native-reanimated";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
-// Custom Tab Bar Component
-const CustomTabBar: FC<BottomTabBarProps> = (props) => {
-  const { styles, theme } = useStyles(stylesheet);
 
-  const { state, navigation, descriptors } = props;
-  const { routes, index } = state;
+const CustomTabBar: FC<BottomTabBarProps> = ({
+  state,
+  navigation,
+  descriptors,
+}) => {
+  const { styles, theme } = useStyles(stylesheet);
+  const { routes, index: activeIndex } = state;
+  const currentRoute = routes[activeIndex];
 
   const indicatorStyle = useAnimatedStyle(() => {
     const tabWidth = DEVICE_WIDTH / routes.length;
     return {
       width: tabWidth,
-      left: withTiming(index * tabWidth, {
+      left: withTiming(activeIndex * tabWidth, {
         duration: 300,
         easing: Easing.elastic(1),
       }),
     };
   });
 
-  const showFab =
-    routes[index].name === "home" || routes[index].name === "chats";
+  const showFab = currentRoute.name === "home" || currentRoute.name === "chats";
 
   return (
-    <Animated.View style={[]}>
+    <Animated.View>
       {showFab && (
         <Animated.View
           entering={ZoomIn}
           exiting={ZoomOut}
           style={styles.fabContainer}
         >
-          {routes[index].name === "chats" ? (
+          {currentRoute.name === "chats" ? (
             <Animated.View
               entering={ZoomIn.duration(500).delay(80)}
               exiting={ZoomOut}
             >
-              <ChatBubbleLeftRightIcon
-                strokeWidth={1.2}
-                color={Colors.white}
-                width={RFValue(25)}
-                height={RFValue(25)}
-              />
+              <TouchableOpacity
+                onPress={() => router.navigate("/(authenticated)/add_chat")}
+              >
+                <ChatBubbleLeftRightIcon
+                  strokeWidth={1.2}
+                  color={Colors.white}
+                  width={RFValue(25)}
+                  height={RFValue(25)}
+                />
+              </TouchableOpacity>
             </Animated.View>
           ) : (
             <Animated.View
               entering={ZoomIn.duration(500).delay(80)}
               exiting={ZoomOut.duration(500)}
             >
-              <PlusCircleIcon
-                strokeWidth={1.2}
-                color={Colors.white}
-                width={RFValue(25)}
-                height={RFValue(25)}
-              />
+              <TouchableOpacity
+                onPress={() => router.navigate("/(authenticated)/add_post")}
+              >
+                <PlusCircleIcon
+                  strokeWidth={1.2}
+                  color={Colors.white}
+                  width={RFValue(25)}
+                  height={RFValue(25)}
+                />
+              </TouchableOpacity>
             </Animated.View>
           )}
         </Animated.View>
       )}
       <View>
         <View style={styles.tabBarStyle}>
-          {state.routes.map((route, index) => {
+          {routes.map((route, routeIndex) => {
             const { options } = descriptors[route.key];
-
-            // Determine the label for the tab (fallback to route name)
             const label =
               options.tabBarLabel !== undefined
                 ? options.tabBarLabel
@@ -87,8 +96,7 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
                 ? options.title
                 : route.name;
 
-            const isFocused = state.index === index;
-
+            const isFocused = activeIndex === routeIndex;
             const activeColor = options.tabBarActiveTintColor || Colors.primary;
             const inactiveColor =
               options.tabBarInactiveTintColor || theme.Colors.gray[300];
@@ -127,13 +135,11 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
                   accessibilityRole="button"
                   accessibilityState={isFocused ? { selected: true } : {}}
                   style={styles.tabBarItemStyle}
+                  hitSlop={50}
                 >
                   {icon}
                   <CustomText
-                    style={{
-                      color,
-                      fontSize: 12,
-                    }}
+                    style={{ color, fontSize: 12 }}
                     variant="h7"
                     fontFamily={Fonts.Regular}
                   >
@@ -199,6 +205,6 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     alignItems: "center",
     right: 10,
     position: "absolute",
-    elevation: 3,
+    elevation: 1,
   },
 }));

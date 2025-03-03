@@ -7,7 +7,7 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   Cog8ToothIcon,
   HomeIcon,
-  UserCircleIcon,
+  Squares2X2Icon,
 } from "react-native-heroicons/solid";
 import { useStyles } from "react-native-unistyles";
 
@@ -32,8 +32,16 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <HomeIcon color={color} size={size} />
           ),
-          tabBarBadge: 10,
           tabBarLabel: "Home",
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Squares2X2Icon color={color} size={size} />
+          ),
+          tabBarLabel: "Explore",
         }}
       />
       <Tabs.Screen
@@ -42,19 +50,11 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <ChatBubbleOvalLeftEllipsisIcon color={color} size={size} />
           ),
-          tabBarBadge: 99,
+
           tabBarLabel: "Chats",
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <UserCircleIcon color={color} size={size} />
-          ),
-          tabBarLabel: "Profile",
-        }}
-      />
+
       <Tabs.Screen
         name="settings"
         options={{

@@ -1,14 +1,14 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const Profile = () => {
+const ChatCard = () => {
   return (
     <View>
-      <Text>Profile</Text>
+      <Text>ChatCard</Text>
     </View>
   );
 };
 
-export default Profile;
+export default ChatCard;
 
 const styles = StyleSheet.create({});

@@ -2,18 +2,18 @@ import { Text, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
-const index = () => {
+const UserMedia = () => {
   const { styles, theme } = useStyles(stylesheet);
   return (
     <View style={[styles.page, { backgroundColor: theme.Colors.background }]}>
       <Text style={[styles.text, { color: theme.Colors.typography }]}>
-        Chats
+        UserMedia
       </Text>
     </View>
   );
 };
 
-export default index;
+export default UserMedia;
 
 const stylesheet = createStyleSheet({
   page: {
