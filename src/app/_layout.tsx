@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/react-native";
 import CustomThemeProvider from "CustomThemeProvider";
 import * as QuickActions from "expo-quick-actions";
 import {
-  Slot,
+  Stack,
   useNavigationContainerRef,
   useRouter,
   useSegments,
@@ -123,7 +123,10 @@ const InitialLayout = () => {
   return (
     <CustomThemeProvider>
       <ClerkLoaded>
-        <Slot />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(public)" />
+          <Stack.Screen name="(authenticated)" />
+        </Stack>
       </ClerkLoaded>
     </CustomThemeProvider>
   );

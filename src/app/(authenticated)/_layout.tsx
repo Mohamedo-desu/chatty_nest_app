@@ -34,6 +34,12 @@ const AuthenticatedLayout = () => {
         }}
       />
       <Stack.Screen
+        name="notifications_settings"
+        options={{
+          headerTitle: "Notifications Settings",
+        }}
+      />
+      <Stack.Screen
         name="(tabs)"
         options={{
           headerShown: false,
