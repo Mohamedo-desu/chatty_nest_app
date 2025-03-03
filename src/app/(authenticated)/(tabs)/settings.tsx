@@ -13,7 +13,6 @@ import {
   InformationCircleIcon,
   LockClosedIcon,
   MoonIcon,
-  NoSymbolIcon,
   ShieldCheckIcon,
   UserIcon,
 } from "react-native-heroicons/solid";
@@ -56,14 +55,6 @@ const SettingsScreen = () => {
           onPress: () => {
             // Navigate to privacy settings
             router.navigate("/(authenticated)/privacy_settings");
-          },
-        },
-        {
-          title: "Blocked Accounts",
-          icon: NoSymbolIcon,
-          onPress: () => {
-            // Navigate to blocked accounts
-            router.navigate("/(authenticated)/blocked_accounts");
           },
         },
       ],

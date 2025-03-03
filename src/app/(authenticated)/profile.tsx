@@ -63,10 +63,17 @@ const Header = () => {
           </CustomText>
         </View>
 
+        <CustomText
+          fontSize={RFValue(14)}
+          style={[styles.profileDetail, { marginTop: 10 }]}
+        >
+          user bio
+        </CustomText>
+
         <View style={styles.followStatsContainer}>
           <CustomText style={styles.countText}>
             {shortenNumber(200)}{" "}
-            <CustomText style={styles.followStatLabel}>Following</CustomText>
+            <CustomText style={styles.followStatLabel}>Followings</CustomText>
           </CustomText>
           <CustomText style={styles.countText}>
             {shortenNumber(3000)}{" "}
@@ -165,8 +172,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   },
   followStatsContainer: {
     flexDirection: "row",
-    gap: 10,
-    marginTop: 15,
+    gap: 25,
   },
   countText: {
     fontFamily: Fonts.Medium,

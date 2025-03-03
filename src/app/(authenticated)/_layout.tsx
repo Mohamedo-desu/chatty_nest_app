@@ -16,6 +16,24 @@ const AuthenticatedLayout = () => {
         }}
       />
       <Stack.Screen
+        name="change_password"
+        options={{
+          headerTitle: "Change Password",
+        }}
+      />
+      <Stack.Screen
+        name="privacy_settings"
+        options={{
+          headerTitle: "Privacy Settings",
+        }}
+      />
+      <Stack.Screen
+        name="message_filtering"
+        options={{
+          headerTitle: "Message Filtering",
+        }}
+      />
+      <Stack.Screen
         name="(tabs)"
         options={{
           headerShown: false,
