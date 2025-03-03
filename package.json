@@ -24,6 +24,7 @@
     "@clerk/clerk-expo": "^2.8.2",
     "@clerk/types": "^4.47.0",
     "@expo/vector-icons": "^14.0.2",
+    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@sentry/react-native": "~6.3.0",
@@ -32,6 +33,8 @@
     "expo-constants": "~17.0.7",
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
+    "expo-image": "^2.0.6",
+    "expo-image-picker": "^16.0.6",
     "expo-linear-gradient": "^14.0.2",
     "expo-linking": "~7.0.5",
     "expo-quick-actions": "^4.0.2",
@@ -43,6 +46,7 @@
     "expo-system-ui": "~4.0.8",
     "expo-updates": "^0.27.2",
     "expo-web-browser": "~14.0.2",
+    "formik": "^2.4.6",
     "react": "18.3.1",
     "react-native": "0.76.7",
     "react-native-collapsible-tab-view": "^8.0.0",
@@ -60,6 +64,7 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-unistyles": "^2.31.0",
     "vexo-analytics": "^1.4.6",
+    "yup": "^1.6.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

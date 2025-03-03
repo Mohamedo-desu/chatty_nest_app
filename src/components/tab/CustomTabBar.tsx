@@ -199,7 +199,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     backgroundColor: theme.Colors.primary,
     height: 45,
     width: 45,
-    bottom: rt.insets.bottom + 55,
+    bottom: rt.insets.bottom + 50,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",

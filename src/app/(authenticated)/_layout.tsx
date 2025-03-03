@@ -7,7 +7,22 @@ const AuthenticatedLayout = () => {
 
   // if (!user) return <Redirect href={"/(public)"} />;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: true }}>
+      <Stack.Screen
+        name="edit_profile"
+        options={{
+          headerTitle: "Edit Profile",
+        }}
+      />
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
+  );
 };
 
 export default AuthenticatedLayout;
