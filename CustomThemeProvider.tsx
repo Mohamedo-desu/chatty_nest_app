@@ -6,7 +6,7 @@ import {
   ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { useQuickActionRouting } from "expo-quick-actions/router";
-import { setStatusBarStyle, StatusBar } from "expo-status-bar";
+import { StatusBar } from "expo-status-bar";
 import { PropsWithChildren, useEffect, useMemo } from "react";
 import { useColorScheme } from "react-native";
 import { UnistylesRuntime } from "react-native-unistyles";
@@ -73,8 +73,6 @@ const CustomThemeProvider = ({ children }: PropsWithChildren) => {
     UnistylesRuntime.setTheme(selectedTheme);
     UnistylesRuntime.navigationBar.setColor(navBarColor);
     UnistylesRuntime.setRootViewBackgroundColor(navBarColor);
-
-    setStatusBarStyle(isDarkTheme ? "light" : "dark", true);
   }, [selectedTheme]);
 
   const currentNavigationTheme = useMemo(
@@ -85,8 +83,8 @@ const CustomThemeProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <NavigationThemeProvider value={currentNavigationTheme}>
-      <StatusBar />
       {children}
+      <StatusBar style={selectedTheme === "dark" ? "light" : "dark"} />
     </NavigationThemeProvider>
   );
 };
