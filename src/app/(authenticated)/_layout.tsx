@@ -1,11 +1,11 @@
 import { useUser } from "@clerk/clerk-expo";
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import React from "react";
 
 const AuthenticatedLayout = () => {
   const { user } = useUser();
 
-  // if (!user) return <Redirect href={"/(public)"} />;
+  if (!user) return <Redirect href={"/(public)"} />;
 
   return (
     <Stack screenOptions={{ headerShown: true }}>

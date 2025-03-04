@@ -19,6 +19,7 @@ export const en = {
       description: "Sign up to continue",
       signUp: "Sign Up",
       or: "Or continue with",
+      displayNamePlaceholder: "Enter your full name",
       emailPlaceholder: "Enter your email",
       passwordPlaceholder: "Enter your password",
       confirmPasswordPlaceholder: "Re-enter your password",

@@ -15,6 +15,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
 import React, { useEffect } from "react";
 import { ActivityIndicator, LogBox, Platform, View } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
@@ -105,12 +106,11 @@ const InitialLayout = () => {
     const inAuthGroup = segments[0] === "(authenticated)";
     const inPublicGroup = segments[0] === "(public)";
 
-    // if (isSignedIn && !inAuthGroup) {
-
-    // } else if (!isSignedIn && !inPublicGroup) {
-    //   router.replace("/(authenticated)/(tabs)/home");
-    // }
-    router.replace("/(authenticated)/(tabs)/home");
+    if (isSignedIn && !inAuthGroup) {
+      router.replace("/(authenticated)/(tabs)/home");
+    } else if (!isSignedIn && !inPublicGroup) {
+      router.replace("/(public)");
+    }
   }, [isSignedIn]);
 
   if (!isLoaded) {
@@ -201,7 +201,9 @@ const RootLayout = () => {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <InitialLayout />
+      <KeyboardProvider>
+        <InitialLayout />
+      </KeyboardProvider>
 
       <Toast config={ToastConfig} position="top" topOffset={top + 15} />
     </ClerkProvider>

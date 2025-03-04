@@ -110,6 +110,7 @@ const ProfileScreen = () => {
       containerStyle={styles.container}
       initialTabName="Posts"
       renderTabBar={tabBar}
+      headerContainerStyle={{ elevation: 0 }}
     >
       <Tabs.Tab name="Posts">
         <UserPosts />
