@@ -33,6 +33,7 @@ const TabsLayout = () => {
             <HomeIcon color={color} size={size} />
           ),
           tabBarLabel: "Home",
+          tabBarBadge: 3,
         }}
       />
       <Tabs.Screen
@@ -52,6 +53,7 @@ const TabsLayout = () => {
           ),
 
           tabBarLabel: "Chats",
+          tabBarBadge: 5,
         }}
       />
 

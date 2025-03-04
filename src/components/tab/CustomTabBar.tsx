@@ -8,7 +8,7 @@ import React, { FC } from "react";
 import { TouchableOpacity, View } from "react-native";
 import {
   ChatBubbleLeftRightIcon,
-  PlusCircleIcon,
+  PlusIcon,
 } from "react-native-heroicons/solid";
 import Animated, {
   Easing,
@@ -61,7 +61,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
                 <ChatBubbleLeftRightIcon
                   strokeWidth={1.2}
                   color={Colors.white}
-                  size={RFValue(25)}
+                  size={RFValue(20)}
                 />
               </TouchableOpacity>
             </Animated.View>
@@ -73,7 +73,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
               <TouchableOpacity
                 onPress={() => router.navigate("/(authenticated)/add_post")}
               >
-                <PlusCircleIcon color={Colors.white} size={RFValue(35)} />
+                <PlusIcon color={Colors.white} size={RFValue(20)} />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -191,7 +191,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   },
   fabContainer: {
     backgroundColor: theme.Colors.primary,
-    height: 55,
+    height: 45,
     aspectRatio: 1,
     bottom: rt.insets.bottom + 45,
     borderRadius: 100,

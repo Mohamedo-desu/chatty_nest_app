@@ -82,10 +82,6 @@ const HelpScreen = () => {
       style={[styles.screen]}
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      {/* Header */}
-      <CustomText variant="h1" fontFamily={Fonts.Bold}>
-        Help & Reports
-      </CustomText>
       <CustomText
         variant="h5"
         fontFamily={Fonts.Medium}
@@ -171,19 +167,17 @@ export default HelpScreen;
 const stylesheet = createStyleSheet((theme, rt) => ({
   screen: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
     backgroundColor: theme.Colors.background,
-    paddingTop: rt.insets.top + 20,
   },
   subTitle: {
     marginTop: 10,
-
     color: theme.Colors.gray[500],
   },
   reportTypeContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     marginVertical: 20,
   },
   reportTypeButton: (selectedType, type) => ({

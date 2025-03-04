@@ -101,7 +101,7 @@ const SettingsScreen = () => {
           icon: GlobeAltIcon,
           onPress: () => {
             // Navigate to language selection
-            router.navigate("/language");
+            router.navigate("/language_settings");
           },
         },
         {

@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import { vexo } from "vexo-analytics";
+import "../translations/i18n";
 import "../unistyle/unistyles";
 
 LogBox.ignoreLogs(["Clerk: Clerk has been loaded with development keys"]);
@@ -123,9 +124,49 @@ const InitialLayout = () => {
   return (
     <CustomThemeProvider>
       <ClerkLoaded>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(public)" />
-          <Stack.Screen name="(authenticated)" />
+        <Stack screenOptions={{ headerShown: true }}>
+          <Stack.Screen
+            name="(public)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(authenticated)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="theme_settings"
+            options={{
+              headerTitle: "Theme Settings",
+            }}
+          />
+          <Stack.Screen
+            name="help_center"
+            options={{
+              headerTitle: "Help Center",
+            }}
+          />
+          <Stack.Screen
+            name="help"
+            options={{
+              headerTitle: "Help & Reports",
+            }}
+          />
+          <Stack.Screen
+            name="language_settings"
+            options={{
+              headerTitle: "Language Settings",
+            }}
+          />
+          <Stack.Screen
+            name="about"
+            options={{
+              headerTitle: "About",
+            }}
+          />
         </Stack>
       </ClerkLoaded>
     </CustomThemeProvider>

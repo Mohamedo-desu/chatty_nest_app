@@ -9,7 +9,7 @@ const APP_NAME = "Chatty Nest - Meet People";
 const BUNDLE_IDENTIFIER = `com.mohamedodesu.${PROJECT_SLUG}`;
 const PACKAGE_NAME = `com.mohamedodesu.${PROJECT_SLUG}`;
 const ICON = "./assets/icons/ios-prod.png";
-const ADAPTIVE_ICON = "./assets/icons/android-prod.png";
+const ADAPTIVE_ICON = "./assets/icons/Android-Prod.png";
 const SCHEME = PROJECT_SLUG;
 
 export default ({ config }: ConfigContext): ExpoConfig => {
@@ -132,7 +132,7 @@ export const getDynamicAppConfig = (
       bundleIdentifier: `${BUNDLE_IDENTIFIER}.preview`,
       packageName: `${PACKAGE_NAME}.preview`,
       icon: "./assets/icons/ios-prev.png",
-      adaptiveIcon: "./assets/icons/android-prev.png",
+      adaptiveIcon: "./assets/icons/Android-Prev.png",
       scheme: `${SCHEME}-prev`,
     };
   }
@@ -142,7 +142,7 @@ export const getDynamicAppConfig = (
     bundleIdentifier: `${BUNDLE_IDENTIFIER}.dev`,
     packageName: `${PACKAGE_NAME}.dev`,
     icon: "./assets/icons/ios-dev.png",
-    adaptiveIcon: "./assets/icons/android-dev.png",
+    adaptiveIcon: "./assets/icons/Android-Dev.png",
     scheme: `${SCHEME}-dev`,
   };
 };

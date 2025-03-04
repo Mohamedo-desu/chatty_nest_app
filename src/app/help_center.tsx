@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { ChevronRightIcon } from "react-native-heroicons/solid";
 import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
@@ -228,59 +227,54 @@ const HelpCenter: React.FC = () => {
     .filter((section) => section.faqs.length > 0 || searchQuery.trim() === "");
 
   return (
-    <SafeAreaView style={styles.page}>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Search Input */}
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search FAQs..."
-          placeholderTextColor={theme.Colors.gray[400]}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {filteredSections.map((section, sectionIndex) => (
-          <View key={section.title} style={styles.sectionContainer}>
-            <TouchableOpacity
-              onPress={() => toggleSection(section.title)}
-              style={styles.sectionHeader}
-            >
-              <CustomText style={styles.sectionTitle} variant="h6">
-                {section.title}
-              </CustomText>
-              <ChevronRightIcon
-                color={theme.Colors.gray[400]}
-                width={RFValue(20)}
-                height={RFValue(20)}
-                style={{
-                  transform: [
-                    {
-                      rotate: expandedSections[section.title]
-                        ? "90deg"
-                        : "0deg",
-                    },
-                  ],
-                }}
-              />
-            </TouchableOpacity>
-            {expandedSections[section.title] &&
-              section.faqs.map((faq, faqIndex) => (
-                <View key={faqIndex} style={styles.faqItem}>
-                  <CustomText style={styles.questionText}>
-                    {faq.question}
-                  </CustomText>
-                  <CustomText style={styles.answerText}>
-                    {faq.answer}
-                  </CustomText>
-                </View>
-              ))}
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* Search Input */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search FAQs..."
+        placeholderTextColor={theme.Colors.gray[400]}
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+      {filteredSections.map((section, sectionIndex) => (
+        <View key={section.title} style={styles.sectionContainer}>
+          <TouchableOpacity
+            onPress={() => toggleSection(section.title)}
+            style={styles.sectionHeader}
+          >
+            <CustomText style={styles.sectionTitle} variant="h6">
+              {section.title}
+            </CustomText>
+            <ChevronRightIcon
+              color={theme.Colors.gray[400]}
+              width={RFValue(20)}
+              height={RFValue(20)}
+              style={{
+                transform: [
+                  {
+                    rotate: expandedSections[section.title] ? "90deg" : "0deg",
+                  },
+                ],
+              }}
+            />
+          </TouchableOpacity>
+          {expandedSections[section.title] &&
+            section.faqs.map((faq, faqIndex) => (
+              <View key={faqIndex} style={styles.faqItem}>
+                <CustomText style={styles.questionText}>
+                  {faq.question}
+                </CustomText>
+                <CustomText style={styles.answerText}>{faq.answer}</CustomText>
+              </View>
+            ))}
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 

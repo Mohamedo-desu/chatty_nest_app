@@ -28,6 +28,7 @@ const Home = () => {
       containerStyle={styles.container}
       initialTabName={"For You"}
       renderTabBar={tabBar}
+      headerContainerStyle={{ elevation: 0 }}
     >
       <Tabs.Tab name="For You">
         <ForYou />
@@ -53,6 +54,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   },
   tabBarStyle: {
     backgroundColor: theme.Colors.background,
+    elevation: 0,
   },
 }));
 export default Home;

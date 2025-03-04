@@ -160,13 +160,14 @@ const Notifications: React.FC = () => {
 
 export default Notifications;
 
-const stylesheet = createStyleSheet((theme) => ({
+const stylesheet = createStyleSheet((theme, rt) => ({
   page: {
     flex: 1,
     backgroundColor: theme.Colors.background,
   },
   contentContainer: {
     padding: moderateScale(16),
+    paddingBottom: rt.insets.bottom + 10,
   },
   sectionContainer: {
     marginBottom: moderateScale(24),

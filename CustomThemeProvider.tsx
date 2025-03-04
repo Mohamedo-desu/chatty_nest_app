@@ -84,7 +84,10 @@ const CustomThemeProvider = ({ children }: PropsWithChildren) => {
   return (
     <NavigationThemeProvider value={currentNavigationTheme}>
       {children}
-      <StatusBar style={selectedTheme === "dark" ? "light" : "dark"} />
+      <StatusBar
+        style={selectedTheme === "dark" ? "light" : "dark"}
+        backgroundColor={selectedTheme === "dark" ? Colors.black : Colors.white}
+      />
     </NavigationThemeProvider>
   );
 };

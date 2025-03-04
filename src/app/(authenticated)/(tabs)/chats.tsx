@@ -28,6 +28,7 @@ const Chats = () => {
       containerStyle={styles.container}
       initialTabName={"Chats"}
       renderTabBar={tabBar}
+      headerContainerStyle={{ elevation: 0 }}
     >
       <Tabs.Tab name="Chats">
         <ChatsScreen />
