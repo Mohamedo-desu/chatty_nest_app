@@ -68,23 +68,27 @@ const MessageFilteringScreen: React.FC = () => {
 
   // Fetch message filtering settings from Supabase and update the store.
   const fetchMessageFilteringSettings = async () => {
-    if (!userId) return;
-    const { data, error } = await client
-      .from("message_filtering")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    if (error) {
-      console.error("Error fetching message filtering settings:", error);
-      return;
-    }
-    if (data) {
-      setMessageFilteringSettings({
-        filterUnknown: data.filter_unknown,
-        filterExplicit: data.filter_explicit,
-        blockedKeywords: data.blocked_keywords || [],
-      });
-      setLocalBlockedKeywords((data.blocked_keywords || []).join(", "));
+    try {
+      if (!userId) return;
+      const { data, error } = await client
+        .from("message_filtering")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (error) {
+        console.error("Error fetching message filtering settings:", error);
+        return;
+      }
+      if (data) {
+        setMessageFilteringSettings({
+          filterUnknown: data.filter_unknown,
+          filterExplicit: data.filter_explicit,
+          blockedKeywords: data.blocked_keywords || [],
+        });
+        setLocalBlockedKeywords((data.blocked_keywords || []).join(", "));
+      }
+    } catch (error: any) {
+      showToast("error", "Error", error.message);
     }
   };
 
@@ -224,5 +228,6 @@ const stylesheet = createStyleSheet((theme) => ({
     backgroundColor: theme.Colors.gray[50],
     textAlignVertical: "top",
     marginBottom: moderateScale(16),
+    color: theme.Colors.typography,
   },
 }));

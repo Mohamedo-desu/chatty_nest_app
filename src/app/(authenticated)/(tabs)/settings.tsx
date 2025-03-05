@@ -12,7 +12,6 @@ import {
   ExclamationTriangleIcon,
   GlobeAltIcon,
   InformationCircleIcon,
-  LockClosedIcon,
   MoonIcon,
   ShieldCheckIcon,
   UserIcon,
@@ -35,14 +34,6 @@ const SettingsScreen = () => {
           onPress: () => {
             // Navigate to profile settings
             router.navigate("/(authenticated)/profile");
-          },
-        },
-        {
-          title: "Change Password",
-          icon: LockClosedIcon,
-          onPress: () => {
-            // Navigate to change password screen
-            router.navigate("/(authenticated)/change_password");
           },
         },
       ],

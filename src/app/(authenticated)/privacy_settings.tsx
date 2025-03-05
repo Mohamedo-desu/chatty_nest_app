@@ -62,22 +62,26 @@ const PrivacyScreen: React.FC = () => {
 
   // Fetch privacy settings from Supabase and update the store.
   const fetchPrivacySettings = async () => {
-    if (!userId) return;
-    const { data, error } = await client
-      .from("privacy_settings")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    if (error) {
-      console.error("Error fetching privacy settings:", error);
-      return;
-    }
-    if (data) {
-      setPrivacySettings({
-        private_account: data.private_account,
-        activity_status: data.activity_status,
-        read_receipts: data.read_receipts,
-      });
+    try {
+      if (!userId) return;
+      const { data, error } = await client
+        .from("privacy_settings")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (error) {
+        console.error("Error fetching privacy settings:", error);
+        return;
+      }
+      if (data) {
+        setPrivacySettings({
+          private_account: data.private_account,
+          activity_status: data.activity_status,
+          read_receipts: data.read_receipts,
+        });
+      }
+    } catch (error: any) {
+      showToast("error", "Error", error.message);
     }
   };
 
