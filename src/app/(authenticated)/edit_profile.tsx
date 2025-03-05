@@ -1,7 +1,7 @@
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
-import { appName } from "@/constants";
+import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
@@ -62,8 +62,8 @@ const EditProfile: React.FC = () => {
   );
 
   // Returns MIME type based on file extension
-  const getMimeType = (fileName: string): string => {
-    const ext = fileName.split(".").pop()?.toLowerCase();
+  const getMimeType = (uri: string): string => {
+    const ext = uri.split(".").pop()?.toLowerCase();
     switch (ext) {
       case "jpg":
       case "jpeg":
@@ -77,31 +77,6 @@ const EditProfile: React.FC = () => {
     }
   };
 
-  // Prepares a local copy of the image by either moving (if already local) or downloading (if remote)
-  const prepareLocalImage = async (
-    uri: string,
-    folder: string
-  ): Promise<string> => {
-    if (!userId) throw new Error("User not logged in");
-    const directory =
-      FileSystem.documentDirectory + `${appName}/images/${userId}/${folder}/`;
-    const dirInfo = await FileSystem.getInfoAsync(directory);
-    if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-    }
-    const fileName = uri.split("/").pop() || "image";
-    const destinationUri = directory + fileName;
-    if (uri.startsWith("file://")) {
-      // If the image is already local, move it to our folder.
-      await FileSystem.moveAsync({ from: uri, to: destinationUri });
-      return destinationUri;
-    } else {
-      // If remote, download the image to the destination.
-      const downloaded = await FileSystem.downloadAsync(uri, destinationUri);
-      return downloaded.uri;
-    }
-  };
-
   // Reusable function to upload an image to Supabase Storage.
   // It uploads the image to images/{userId}/{folder}/{fileName} and returns its public URL.
   const uploadImage = async (
@@ -109,13 +84,12 @@ const EditProfile: React.FC = () => {
     folder: string,
     fileName: string
   ): Promise<string> => {
-    const localUri = await prepareLocalImage(uri, folder);
-    // Read the file as a base64 string and decode it
-    const base64Data = await FileSystem.readAsStringAsync(localUri, {
+    // Read the file as a base64 string directly from the provided URI.
+    const base64Data = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     const fileData = decode(base64Data);
-    const mimeType = getMimeType(fileName);
+    const mimeType = getMimeType(uri);
     const storagePath = `${userId}/${folder}/${fileName}`;
     const { error } = await client.storage
       .from("images")
@@ -188,26 +162,42 @@ const EditProfile: React.FC = () => {
       let coverImageUrl = "";
 
       if (profileImage) {
-        const ext = profileImage.split(".").pop() || "png";
-        profileImageUrl = await uploadImage(
-          profileImage,
-          "avatars",
-          `${profileImage.split("/").pop()}.${ext}`
-        );
-        console.log("Profile image URL:", profileImageUrl);
+        // If the image URI starts with "file://", upload it;
+        // otherwise, assume it's already hosted and use it as-is.
+        profileImageUrl = profileImage.startsWith("file://")
+          ? await uploadImage(
+              profileImage,
+              "avatars",
+              `${profileImage.split("/").pop()}`
+            )
+          : profileImage;
       }
       if (coverImage) {
-        const ext = coverImage.split(".").pop() || "png";
-        coverImageUrl = await uploadImage(
-          coverImage,
-          "cover",
-          `${coverImage.split("/").pop()}.${ext}`
-        );
-        console.log("Cover image URL:", coverImageUrl);
+        coverImageUrl = coverImage.startsWith("file://")
+          ? await uploadImage(
+              coverImage,
+              "cover",
+              `${coverImage.split("/").pop()}`
+            )
+          : coverImage;
       }
 
-      console.log("Form values:", values);
+      // Check if username already exists (ignoring the current user)
+      const { data: existingUsers, error: usernameCheckError } = await client
+        .from("users")
+        .select("user_id")
+        .eq("user_name", values.userName)
+        .neq("user_id", userId);
 
+      if (usernameCheckError) {
+        throw usernameCheckError;
+      }
+      if (existingUsers && existingUsers.length > 0) {
+        throw new Error(
+          "Username already taken, please choose a different one."
+        );
+      }
+      // then continue
       const { data, error } = await client
         .from("users")
         .update({
@@ -226,9 +216,15 @@ const EditProfile: React.FC = () => {
       if (data) {
         setCurrentUser(data);
       }
-    } catch (error) {
+      showToast("success", "Success", "Updated Successfully!");
+    } catch (error: any) {
       console.error("Error submitting form:", error);
-      Alert.alert("Error", "There was an error updating your profile.");
+
+      showToast(
+        "error",
+        "There was an error updating your profile.",
+        error.message
+      );
     } finally {
       setLoading(false);
     }
@@ -402,6 +398,7 @@ const stylesheet = createStyleSheet((theme) => ({
     alignItems: "center",
     borderStyle: "dashed",
     marginHorizontal: moderateScale(5),
+    overflow: "hidden",
   },
   imagePreview: {
     width: "100%",

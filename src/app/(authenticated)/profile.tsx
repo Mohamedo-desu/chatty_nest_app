@@ -7,8 +7,9 @@ import { useUserStore } from "@/store/userStore";
 import { capitalizeWords, shortenNumber } from "@/utils/functions";
 import { dateFormatWithYear } from "@/utils/timeUtils";
 import dayjs from "dayjs";
+import { Image, ImageBackground } from "expo-image";
 import { router } from "expo-router";
-import { Image, ImageBackground, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { MaterialTabBar, Tabs } from "react-native-collapsible-tab-view";
 import {
   CakeIcon,
@@ -33,11 +34,11 @@ const Header = () => {
             currentUser.cover_url ||
             "https://static.vecteezy.com/system/resources/thumbnails/049/855/259/small_2x/nature-background-high-resolution-wallpaper-for-a-serene-and-stunning-view-photo.jpg",
         }}
-        resizeMode="cover"
+        contentFit="cover"
       >
         <Image
           source={{ uri: currentUser.photo_url || "https://i.pravatar.cc/200" }}
-          resizeMode="contain"
+          contentFit="cover"
           style={styles.profileImage}
         />
         <TouchableOpacity

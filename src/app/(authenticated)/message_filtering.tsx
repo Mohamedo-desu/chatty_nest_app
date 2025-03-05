@@ -1,37 +1,118 @@
 import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
+import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
-import { Formik, FormikHelpers } from "formik";
-import React from "react";
+import { useSettingsStore } from "@/store/settingsStore";
+import { client } from "@/supabase/config";
+import { useUser } from "@clerk/clerk-expo";
+import React, { useEffect, useState } from "react";
 import { ScrollView, Switch, TextInput, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
-import * as Yup from "yup";
 
-interface MessageFilteringFormValues {
+interface MessageFilteringSettings {
   filterUnknown: boolean;
   filterExplicit: boolean;
-  blockedKeywords: string;
+  blockedKeywords: string[];
 }
-
-// Yup validation schema (blockedKeywords is optional)
-const validationSchema = Yup.object().shape({
-  blockedKeywords: Yup.string(),
-});
-
-/**
- * Helper function that takes a comma-separated string of keywords and returns an array.
- */
-const processBlockedKeywords = (keywords: string): string[] =>
-  keywords
-    .split(",")
-    .map((keyword) => keyword.trim())
-    .filter(Boolean);
 
 const MessageFilteringScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { user } = useUser();
+  const userId = user?.id;
+
+  const { messageFilteringSettings, setMessageFilteringSettings } =
+    useSettingsStore();
+  const [localBlockedKeywords, setLocalBlockedKeywords] = useState<string>("");
+
+  // Helper: convert comma-separated string to array
+  const textToKeywords = (text: string): string[] =>
+    text
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+
+  // Update message filtering settings in Supabase using upsert.
+  const updateMessageFilteringSettingInSupabase = async (
+    field: keyof MessageFilteringSettings,
+    value: any
+  ) => {
+    if (!userId) return;
+
+    // Map store field names to DB column names.
+    const dbFieldMapping: Record<keyof MessageFilteringSettings, string> = {
+      filterUnknown: "filter_unknown",
+      filterExplicit: "filter_explicit",
+      blockedKeywords: "blocked_keywords",
+    };
+
+    // Prepare payload using the current store values, then override the changed field.
+    const payload = {
+      user_id: userId,
+      filter_unknown: messageFilteringSettings.filterUnknown,
+      filter_explicit: messageFilteringSettings.filterExplicit,
+      blocked_keywords: messageFilteringSettings.blockedKeywords,
+      [dbFieldMapping[field]]: value,
+    };
+
+    const { error } = await client
+      .from("message_filtering")
+      .upsert(payload, { onConflict: "user_id" });
+    if (error) {
+      console.error(`Error updating ${field}:`, error);
+      showToast("error", "Error", error.message);
+    }
+  };
+
+  // Fetch message filtering settings from Supabase and update the store.
+  const fetchMessageFilteringSettings = async () => {
+    if (!userId) return;
+    const { data, error } = await client
+      .from("message_filtering")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+    if (error) {
+      console.error("Error fetching message filtering settings:", error);
+      return;
+    }
+    if (data) {
+      setMessageFilteringSettings({
+        filterUnknown: data.filter_unknown,
+        filterExplicit: data.filter_explicit,
+        blockedKeywords: data.blocked_keywords || [],
+      });
+      setLocalBlockedKeywords((data.blocked_keywords || []).join(", "));
+    }
+  };
+
+  useEffect(() => {
+    fetchMessageFilteringSettings();
+  }, [userId]);
+
+  // Handlers for toggles
+  const handleToggleFilterUnknown = (val: boolean) => {
+    setMessageFilteringSettings({ filterUnknown: val });
+    updateMessageFilteringSettingInSupabase("filterUnknown", val);
+  };
+
+  const handleToggleFilterExplicit = (val: boolean) => {
+    setMessageFilteringSettings({ filterExplicit: val });
+    updateMessageFilteringSettingInSupabase("filterExplicit", val);
+  };
+
+  // Handlers for blocked keywords
+  const handleBlockedKeywordsChange = (text: string) => {
+    setLocalBlockedKeywords(text);
+  };
+
+  const handleBlockedKeywordsBlur = () => {
+    const keywordsArray = textToKeywords(localBlockedKeywords);
+    setMessageFilteringSettings({ blockedKeywords: keywordsArray });
+    updateMessageFilteringSettingInSupabase("blockedKeywords", keywordsArray);
+  };
 
   return (
     <ScrollView
@@ -40,98 +121,61 @@ const MessageFilteringScreen: React.FC = () => {
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
+      {/* Toggle for filtering unknown senders */}
+      <View style={styles.toggleContainer}>
+        <CustomText style={styles.toggleLabel}>
+          Filter messages from unknown senders
+        </CustomText>
+        <Switch
+          value={messageFilteringSettings.filterUnknown}
+          onValueChange={handleToggleFilterUnknown}
+          thumbColor={
+            messageFilteringSettings.filterUnknown
+              ? Colors.white
+              : theme.Colors.gray[300]
+          }
+          trackColor={{
+            false: theme.Colors.gray[200],
+            true: theme.Colors.primary,
+          }}
+        />
+      </View>
 
-      <Formik
-        initialValues={{
-          filterUnknown: false,
-          filterExplicit: false,
-          blockedKeywords: "",
-        }}
-        validationSchema={validationSchema}
-        onSubmit={(
-          values: MessageFilteringFormValues,
-          helpers: FormikHelpers<MessageFilteringFormValues>
-        ) => {
-          // Process the blocked keywords into an array
-          const keywordsArray = processBlockedKeywords(values.blockedKeywords);
-          console.log("Filtering values:", {
-            ...values,
-            blockedKeywords: keywordsArray,
-          });
-          // TODO: Call your API to save filtering settings here.
-          helpers.resetForm();
-        }}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          setFieldValue,
-          errors,
-          touched,
-        }) => (
-          <View style={styles.formContainer}>
-            {/* Toggle for filtering messages from unknown senders */}
-            <View style={styles.toggleContainer}>
-              <CustomText style={styles.toggleLabel}>
-                Filter messages from unknown senders
-              </CustomText>
-              <Switch
-                value={values.filterUnknown}
-                onValueChange={(val) => setFieldValue("filterUnknown", val)}
-                thumbColor={
-                  values.filterUnknown ? Colors.white : theme.Colors.gray[300]
-                }
-                trackColor={{
-                  false: theme.Colors.gray[200],
-                  true: theme.Colors.primary,
-                }}
-              />
-            </View>
+      {/* Toggle for filtering explicit content */}
+      <View style={styles.toggleContainer}>
+        <CustomText style={styles.toggleLabel}>
+          Filter messages with explicit language
+        </CustomText>
+        <Switch
+          value={messageFilteringSettings.filterExplicit}
+          onValueChange={handleToggleFilterExplicit}
+          thumbColor={
+            messageFilteringSettings.filterExplicit
+              ? Colors.white
+              : theme.Colors.gray[300]
+          }
+          trackColor={{
+            false: theme.Colors.gray[200],
+            true: theme.Colors.primary,
+          }}
+        />
+      </View>
 
-            {/* Toggle for filtering explicit language */}
-            <View style={styles.toggleContainer}>
-              <CustomText style={styles.toggleLabel}>
-                Filter messages with explicit language
-              </CustomText>
-              <Switch
-                value={values.filterExplicit}
-                onValueChange={(val) => setFieldValue("filterExplicit", val)}
-                thumbColor={
-                  values.filterExplicit ? Colors.white : theme.Colors.gray[300]
-                }
-                trackColor={{
-                  false: theme.Colors.gray[200],
-                  true: theme.Colors.primary,
-                }}
-              />
-            </View>
+      {/* Blocked Keywords Input */}
+      <CustomText style={styles.inputLabel}>
+        Blocked Keywords (comma separated)
+      </CustomText>
+      <TextInput
+        value={localBlockedKeywords}
+        onChangeText={handleBlockedKeywordsChange}
+        onBlur={handleBlockedKeywordsBlur}
+        placeholder="Enter keywords separated by commas"
+        placeholderTextColor={theme.Colors.gray[400]}
+        multiline
+        style={styles.blockedKeywordsInput}
+      />
 
-            {/* Blocked Keywords Input */}
-            <CustomText style={styles.inputLabel}>
-              Blocked Keywords (comma separated)
-            </CustomText>
-            <TextInput
-              value={values.blockedKeywords}
-              onChangeText={handleChange("blockedKeywords")}
-              onBlur={handleBlur("blockedKeywords")}
-              placeholder="Enter keywords separated by commas"
-              placeholderTextColor={theme.Colors.gray[400]}
-              multiline
-              style={styles.blockedKeywordsInput}
-            />
-            {touched.blockedKeywords && errors.blockedKeywords ? (
-              <CustomText style={styles.errorText}>
-                {errors.blockedKeywords}
-              </CustomText>
-            ) : null}
-
-            <CustomButton text="Save Settings" onPress={handleSubmit} />
-          </View>
-        )}
-      </Formik>
+      <CustomButton text="Save Settings" onPress={handleBlockedKeywordsBlur} />
     </ScrollView>
   );
 };
@@ -148,17 +192,6 @@ const stylesheet = createStyleSheet((theme) => ({
     padding: moderateScale(16),
     paddingBottom: moderateScale(20),
   },
-  header: {
-    fontSize: RFValue(18),
-    fontFamily: Fonts.SemiBold,
-    color: theme.Colors.typography,
-    marginBottom: moderateScale(20),
-    textAlign: "center",
-  },
-  formContainer: {
-    width: "100%",
-    gap: moderateScale(20),
-  },
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -166,6 +199,7 @@ const stylesheet = createStyleSheet((theme) => ({
     paddingVertical: moderateScale(12),
     borderBottomWidth: 1,
     borderBottomColor: theme.Colors.gray[200],
+    marginBottom: moderateScale(16),
   },
   toggleLabel: {
     fontSize: RFValue(14),
@@ -189,9 +223,6 @@ const stylesheet = createStyleSheet((theme) => ({
     fontSize: RFValue(14),
     backgroundColor: theme.Colors.gray[50],
     textAlignVertical: "top",
-  },
-  errorText: {
-    color: Colors.error,
-    fontSize: moderateScale(12),
+    marginBottom: moderateScale(16),
   },
 }));

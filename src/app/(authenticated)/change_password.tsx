@@ -1,21 +1,24 @@
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
-import { Formik, FormikHelpers } from "formik";
-import React from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { showToast } from "@/components/toast/ShowToast";
+import { Colors } from "@/constants/Colors";
+import { useUserStore } from "@/store/userStore";
+import { useSignIn } from "@clerk/clerk-expo";
+import { Formik } from "formik";
+import React, { useState } from "react";
+import { Modal, ScrollView, View } from "react-native";
+import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import * as Yup from "yup";
 
 interface ChangePasswordFormValues {
-  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
 const validationSchema = Yup.object().shape({
-  currentPassword: Yup.string().required("Current password is required"),
   newPassword: Yup.string()
     .min(6, "New password must be at least 6 characters")
     .required("New password is required"),
@@ -25,38 +28,88 @@ const validationSchema = Yup.object().shape({
 });
 
 const ChangePassword: React.FC = () => {
-  const { styles, theme } = useStyles(stylesheet);
+  const { styles } = useStyles(stylesheet);
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [code, setCode] = useState("");
 
-  const handleForgotPassword = () => {
-    // Replace with navigation logic or any other action
-    console.log("Forgot Password pressed");
+  // Save form values to use later in the verification step.
+  const [passwordValues, setPasswordValues] =
+    useState<ChangePasswordFormValues | null>(null);
+
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  // Called when user submits the new password form.
+  // It sends an OTP (reset password email code) to the user's email.
+  const handleChangePassword = async (values: ChangePasswordFormValues) => {
+    try {
+      setLoading(true);
+      if (!isLoaded) return;
+
+      // Save the new password for later verification.
+      setPasswordValues(values);
+
+      // Send OTP to the user's email.
+      await signIn?.create({
+        strategy: "reset_password_email_code",
+        identifier: currentUser?.email_address,
+      });
+
+      // Show the OTP verification modal.
+      setVerifying(true);
+    } catch (error: any) {
+      console.log(error);
+      showToast("error", "Error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Once the user enters the OTP, this function verifies it and updates the password.
+  const handleVerify = async () => {
+    try {
+      if (!isLoaded) return;
+      setLoading(true);
+
+      const newPassword = passwordValues?.newPassword;
+      if (!newPassword) {
+        throw new Error("New password is not available.");
+      }
+
+      const result = await signIn?.attemptFirstFactor({
+        strategy: "reset_password_email_code",
+        code,
+        password: newPassword,
+      });
+
+      // if (result?.status === "complete") {
+      //   showToast("success", "Success", "Password reset successfully!");
+      //   await setActive({ session: result.createdSessionId });
+      // } else {
+      //   console.log("Reset password result:", result);
+      // }
+    } catch (error: any) {
+      showToast("error", "Error", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <ScrollView
       style={styles.page}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: moderateScale(16),
-      }}
+      contentContainerStyle={{ flexGrow: 1, padding: moderateScale(16) }}
       showsVerticalScrollIndicator={false}
     >
       <Formik
         initialValues={{
-          currentPassword: "",
           newPassword: "",
           confirmPassword: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={(
-          values: ChangePasswordFormValues,
-          helpers: FormikHelpers<ChangePasswordFormValues>
-        ) => {
-          console.log("Password change values:", values);
-          // TODO: Handle password change API call here.
-          helpers.resetForm();
-        }}
+        onSubmit={handleChangePassword}
       >
         {({
           handleChange,
@@ -67,16 +120,6 @@ const ChangePassword: React.FC = () => {
           touched,
         }) => (
           <View style={styles.formContainer}>
-            <CustomInput
-              placeholder="Current Password"
-              secureTextEntry
-              errors={errors.currentPassword}
-              touched={touched.currentPassword}
-              value={values.currentPassword}
-              handleChange={handleChange("currentPassword")}
-              handleBlur={handleBlur("currentPassword")}
-              rightIcon="lock"
-            />
             <CustomInput
               placeholder="New Password"
               secureTextEntry
@@ -98,17 +141,36 @@ const ChangePassword: React.FC = () => {
               rightIcon="lock"
             />
 
-            {/* Forgot Password Link */}
-            <TouchableOpacity onPress={handleForgotPassword}>
-              <CustomText style={styles.forgotPasswordText} variant="body">
-                Forgot Password?
-              </CustomText>
-            </TouchableOpacity>
-
-            <CustomButton text="Change Password" onPress={handleSubmit} />
+            <CustomButton
+              text="Change Password"
+              onPress={handleSubmit}
+              loading={loading}
+            />
           </View>
         )}
       </Formik>
+
+      {/* Verification Modal */}
+      <Modal visible={verifying} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <CustomText style={styles.modalTitle}>Verify Your Email</CustomText>
+            <CustomInput
+              placeholder="Enter verification code"
+              value={code}
+              handleChange={setCode}
+              keyboardType="numeric"
+              rightIcon="key"
+              style={styles.input}
+            />
+            <CustomButton
+              text="Verify"
+              onPress={handleVerify}
+              loading={loading}
+            />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -124,10 +186,31 @@ const stylesheet = createStyleSheet((theme) => ({
     width: "100%",
     gap: moderateScale(15),
   },
-  forgotPasswordText: {
-    color: theme.Colors.primary,
-    textAlign: "right",
-    textDecorationLine: "underline",
-    marginVertical: moderateScale(8),
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    padding: theme.margins.lg,
+    backgroundColor: theme.Colors.background,
+    borderRadius: theme.border.md,
+    alignItems: "center",
+    gap: 20,
+  },
+  modalTitle: {
+    fontSize: RFValue(18),
+    fontFamily: theme.fonts.SemiBold,
+    color: Colors.primary,
+  },
+  input: {
+    width: "100%",
+    marginVertical: moderateScale(15),
   },
 }));

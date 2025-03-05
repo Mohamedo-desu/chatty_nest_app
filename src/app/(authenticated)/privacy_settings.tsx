@@ -1,8 +1,12 @@
 import CustomText from "@/components/CustomText";
+import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
+import { useSettingsStore } from "@/store/settingsStore";
+import { client } from "@/supabase/config";
+import { useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { ScrollView, Switch, TouchableOpacity, View } from "react-native";
 import {
   BellIcon,
@@ -27,17 +31,62 @@ interface PrivacyItem {
 
 const PrivacyScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { user } = useUser();
+  const userId = user?.id;
 
-  // State for toggle-based privacy options
-  const [privateAccount, setPrivateAccount] = useState<boolean>(false);
-  const [activityStatus, setActivityStatus] = useState<boolean>(true);
-  const [readReceipts, setReadReceipts] = useState<boolean>(true);
+  // Access privacy settings from the existing settings store.
+  const { privacySettings, setPrivacySettings } = useSettingsStore();
 
-  // Define privacy sections and items
-  const sections: {
-    title: string;
-    data: PrivacyItem[];
-  }[] = [
+  // Upsert a privacy setting in Supabase.
+  const updatePrivacySettingInSupabase = async (
+    field: keyof typeof privacySettings,
+    value: boolean
+  ) => {
+    if (!userId) return;
+    const payload = { user_id: userId, [field]: value };
+    const { error } = await client
+      .from("privacy_settings")
+      .upsert(payload, { onConflict: "user_id" });
+    if (error) {
+      console.error(`Error updating ${field}:`, error);
+      showToast("error", "Error", error.message);
+    }
+  };
+
+  // When a toggle changes, update the store and Supabase.
+  const handleToggle =
+    (field: keyof typeof privacySettings) => (val: boolean) => {
+      setPrivacySettings({ [field]: val });
+      updatePrivacySettingInSupabase(field, val);
+    };
+
+  // Fetch privacy settings from Supabase and update the store.
+  const fetchPrivacySettings = async () => {
+    if (!userId) return;
+    const { data, error } = await client
+      .from("privacy_settings")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+    if (error) {
+      console.error("Error fetching privacy settings:", error);
+      return;
+    }
+    if (data) {
+      setPrivacySettings({
+        private_account: data.private_account,
+        activity_status: data.activity_status,
+        read_receipts: data.read_receipts,
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchPrivacySettings();
+  }, [userId]);
+
+  // Define sections using the values from the store.
+  const sections: { title: string; data: PrivacyItem[] }[] = [
     {
       title: "Account Privacy",
       data: [
@@ -45,15 +94,15 @@ const PrivacyScreen: React.FC = () => {
           title: "Private Account",
           icon: ShieldCheckIcon,
           hasSwitch: true,
-          value: privateAccount,
-          onValueChange: setPrivateAccount,
+          value: privacySettings.private_account,
+          onValueChange: handleToggle("private_account"),
         },
         {
           title: "Activity Status",
           icon: BellIcon,
           hasSwitch: true,
-          value: activityStatus,
-          onValueChange: setActivityStatus,
+          value: privacySettings.activity_status,
+          onValueChange: handleToggle("activity_status"),
         },
       ],
     },
@@ -64,8 +113,8 @@ const PrivacyScreen: React.FC = () => {
           title: "Read Receipts",
           icon: InformationCircleIcon,
           hasSwitch: true,
-          value: readReceipts,
-          onValueChange: setReadReceipts,
+          value: privacySettings.read_receipts,
+          onValueChange: handleToggle("read_receipts"),
         },
         {
           title: "Message Filtering",
@@ -97,7 +146,7 @@ const PrivacyScreen: React.FC = () => {
     },
   ];
 
-  // Reusable list item component for privacy options
+  // Reusable list item component.
   const ListItem: React.FC<PrivacyItem> = ({
     title,
     icon: IconComponent,
@@ -110,7 +159,7 @@ const PrivacyScreen: React.FC = () => {
       style={styles.itemContainer}
       onPress={onPress}
       activeOpacity={0.8}
-      disabled={hasSwitch} // disable press if using switch
+      disabled={hasSwitch} // disable press when a switch is used
     >
       <View style={styles.itemIconContainer}>
         <IconComponent

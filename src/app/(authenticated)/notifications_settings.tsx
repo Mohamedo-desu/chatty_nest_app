@@ -1,7 +1,11 @@
 import CustomText from "@/components/CustomText";
+import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
-import React, { useState } from "react";
+import { useSettingsStore } from "@/store/settingsStore";
+import { client } from "@/supabase/config";
+import { useUser } from "@clerk/clerk-expo";
+import React, { useEffect } from "react";
 import { ScrollView, Switch, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
@@ -15,48 +19,87 @@ interface ListItemData {
 
 const Notifications: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { user } = useUser();
+  const userId = user?.id;
+  const { notificationSettings, setNotificationSettings } = useSettingsStore();
 
-  // States for notification options
-  const [pushNotifications, setPushNotifications] = useState<boolean>(true);
-  const [emailNotifications, setEmailNotifications] = useState<boolean>(false);
-  const [smsNotifications, setSmsNotifications] = useState<boolean>(false);
+  // This function uses upsert so that if no row exists, it gets inserted.
+  const updateSettingInSupabase = async (
+    field: keyof typeof notificationSettings,
+    value: boolean
+  ) => {
+    if (!userId) return;
+    const updatePayload = { user_id: userId, [field]: value };
+    const { error } = await client
+      .from("notification_settings")
+      .upsert(updatePayload, { onConflict: "user_id" });
+    if (error) {
+      showToast("error", "Error", error.message);
+    }
+  };
 
-  const [likesNotifications, setLikesNotifications] = useState<boolean>(true);
-  const [commentsNotifications, setCommentsNotifications] =
-    useState<boolean>(true);
-  const [mentionsNotifications, setMentionsNotifications] =
-    useState<boolean>(true);
-  const [friendRequestsNotifications, setFriendRequestsNotifications] =
-    useState<boolean>(true);
-  const [directMessagesNotifications, setDirectMessagesNotifications] =
-    useState<boolean>(true);
-  const [groupNotifications, setGroupNotifications] = useState<boolean>(true);
+  // Handler to update both the store and Supabase.
+  const handleToggle =
+    (field: keyof typeof notificationSettings) => (val: boolean) => {
+      setNotificationSettings({ [field]: val });
+      updateSettingInSupabase(field, val);
+    };
 
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [vibrateEnabled, setVibrateEnabled] = useState<boolean>(false);
+  // Fetch settings from Supabase and update the store.
+  const fetchNotificationSettings = async () => {
+    try {
+      if (!userId) return;
+      const { data, error } = await client
+        .from("notification_settings")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (error) {
+        throw error;
+      }
+      if (data) {
+        setNotificationSettings({
+          push_notifications: data.push_notifications,
+          email_notifications: data.email_notifications,
+          sms_notifications: data.sms_notifications,
+          likes_notifications: data.likes_notifications,
+          comments_notifications: data.comments_notifications,
+          mentions_notifications: data.mentions_notifications,
+          friend_requests_notifications: data.friend_requests_notifications,
+          direct_messages_notifications: data.direct_messages_notifications,
+          group_notifications: data.group_notifications,
+          notification_sound: data.notification_sound,
+          vibrate_on_notification: data.vibrate_on_notification,
+        });
+      }
+    } catch (error: any) {
+      showToast("error", "Error", error.message);
+    }
+  };
 
-  // Define sections and items
-  const sections: {
-    title: string;
-    data: ListItemData[];
-  }[] = [
+  useEffect(() => {
+    fetchNotificationSettings();
+  }, [userId]);
+
+  // Define sections using values from the store.
+  const sections: { title: string; data: ListItemData[] }[] = [
     {
       title: "General Notifications",
       data: [
         {
           title: "Push Notifications",
-          value: pushNotifications,
-          onValueChange: setPushNotifications,
+          value: notificationSettings.push_notifications,
+          onValueChange: handleToggle("push_notifications"),
         },
         {
           title: "Email Notifications",
-          value: emailNotifications,
-          onValueChange: setEmailNotifications,
+          value: notificationSettings.email_notifications,
+          onValueChange: handleToggle("email_notifications"),
         },
         {
           title: "SMS Notifications",
-          value: smsNotifications,
-          onValueChange: setSmsNotifications,
+          value: notificationSettings.sms_notifications,
+          onValueChange: handleToggle("sms_notifications"),
         },
       ],
     },
@@ -65,33 +108,33 @@ const Notifications: React.FC = () => {
       data: [
         {
           title: "Likes",
-          value: likesNotifications,
-          onValueChange: setLikesNotifications,
+          value: notificationSettings.likes_notifications,
+          onValueChange: handleToggle("likes_notifications"),
         },
         {
           title: "Comments",
-          value: commentsNotifications,
-          onValueChange: setCommentsNotifications,
+          value: notificationSettings.comments_notifications,
+          onValueChange: handleToggle("comments_notifications"),
         },
         {
           title: "Mentions",
-          value: mentionsNotifications,
-          onValueChange: setMentionsNotifications,
+          value: notificationSettings.mentions_notifications,
+          onValueChange: handleToggle("mentions_notifications"),
         },
         {
           title: "Friend Requests",
-          value: friendRequestsNotifications,
-          onValueChange: setFriendRequestsNotifications,
+          value: notificationSettings.friend_requests_notifications,
+          onValueChange: handleToggle("friend_requests_notifications"),
         },
         {
           title: "Direct Messages",
-          value: directMessagesNotifications,
-          onValueChange: setDirectMessagesNotifications,
+          value: notificationSettings.direct_messages_notifications,
+          onValueChange: handleToggle("direct_messages_notifications"),
         },
         {
           title: "Group Notifications",
-          value: groupNotifications,
-          onValueChange: setGroupNotifications,
+          value: notificationSettings.group_notifications,
+          onValueChange: handleToggle("group_notifications"),
         },
       ],
     },
@@ -100,19 +143,19 @@ const Notifications: React.FC = () => {
       data: [
         {
           title: "Notification Sound",
-          value: soundEnabled,
-          onValueChange: setSoundEnabled,
+          value: notificationSettings.notification_sound,
+          onValueChange: handleToggle("notification_sound"),
         },
         {
           title: "Vibrate on Notification",
-          value: vibrateEnabled,
-          onValueChange: setVibrateEnabled,
+          value: notificationSettings.vibrate_on_notification,
+          onValueChange: handleToggle("vibrate_on_notification"),
         },
       ],
     },
   ];
 
-  // Reusable list item component
+  // Reusable list item component.
   const ListItem: React.FC<ListItemData> = ({
     title,
     value,
