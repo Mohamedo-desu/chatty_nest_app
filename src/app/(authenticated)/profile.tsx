@@ -3,7 +3,10 @@ import UserMedia from "@/components/screens/UserMedia";
 import UserPosts from "@/components/screens/UserPosts";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
-import { shortenNumber } from "@/utils/functions";
+import { useUserStore } from "@/store/userStore";
+import { capitalizeWords, shortenNumber } from "@/utils/functions";
+import { dateFormatWithYear } from "@/utils/timeUtils";
+import dayjs from "dayjs";
 import { router } from "expo-router";
 import { Image, ImageBackground, TouchableOpacity, View } from "react-native";
 import { MaterialTabBar, Tabs } from "react-native-collapsible-tab-view";
@@ -18,17 +21,22 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 const Header = () => {
   const { styles } = useStyles(stylesheet);
+
+  const currentUser = useUserStore((state) => state.currentUser);
+
   return (
     <View style={styles.header}>
       <ImageBackground
         style={styles.imageBackground}
         source={{
-          uri: "https://static.vecteezy.com/system/resources/thumbnails/049/855/259/small_2x/nature-background-high-resolution-wallpaper-for-a-serene-and-stunning-view-photo.jpg",
+          uri:
+            currentUser.cover_url ||
+            "https://static.vecteezy.com/system/resources/thumbnails/049/855/259/small_2x/nature-background-high-resolution-wallpaper-for-a-serene-and-stunning-view-photo.jpg",
         }}
         resizeMode="cover"
       >
         <Image
-          source={{ uri: "https://i.pravatar.cc/200" }}
+          source={{ uri: currentUser.photo_url || "https://i.pravatar.cc/200" }}
           resizeMode="contain"
           style={styles.profileImage}
         />
@@ -44,22 +52,23 @@ const Header = () => {
       <View style={styles.profileDetailsContainer}>
         <View>
           <CustomText fontFamily={Fonts.SemiBold} variant="h4">
-            Mohamed Abdikafi
+            {capitalizeWords(currentUser.display_name)}
           </CustomText>
           <CustomText fontSize={14} style={styles.username}>
-            @mohamed_abdikafi
+            @{currentUser.user_name}
           </CustomText>
         </View>
         <View style={styles.profileDetailsContainerRow}>
           <CakeIcon color={Colors.primary} size={RFValue(20)} />
           <CustomText fontSize={14} style={styles.profileDetail}>
-            Born 4 December 2002
+            Birth date{" "}
+            {dayjs(currentUser.birth_date).format(dateFormatWithYear) || "N/A"}
           </CustomText>
         </View>
         <View style={styles.profileDetailsContainerRow}>
           <CalendarDaysIcon color={Colors.primary} size={RFValue(20)} />
           <CustomText fontSize={14} style={styles.profileDetail}>
-            Joined March 2023
+            Joined in {dayjs(currentUser.created_at).format(dateFormatWithYear)}
           </CustomText>
         </View>
 
@@ -67,16 +76,16 @@ const Header = () => {
           fontSize={RFValue(14)}
           style={[styles.profileDetail, { marginTop: 10 }]}
         >
-          user bio
+          {currentUser.user_bio}
         </CustomText>
 
         <View style={styles.followStatsContainer}>
           <CustomText style={styles.countText}>
-            {shortenNumber(200)}{" "}
+            {shortenNumber(currentUser.user_followings?.length)}{" "}
             <CustomText style={styles.followStatLabel}>Followings</CustomText>
           </CustomText>
           <CustomText style={styles.countText}>
-            {shortenNumber(3000)}{" "}
+            {shortenNumber(currentUser.user_followers?.length)}{" "}
             <CustomText style={styles.followStatLabel}>Followers</CustomText>
           </CustomText>
         </View>

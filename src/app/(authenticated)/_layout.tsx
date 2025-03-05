@@ -1,11 +1,39 @@
+import { useUserStore } from "@/store/userStore";
+import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
 import { Redirect, Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 
 const AuthenticatedLayout = () => {
   const { user } = useUser();
 
   if (!user) return <Redirect href={"/(public)"} />;
+
+  const setCurrentUser = useUserStore((state) => state.setCurrentUser);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUserData = async () => {
+      try {
+        const { data, error } = await client
+          .from("users")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+        if (data) {
+          setCurrentUser(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUserData();
+  }, [user]);
 
   return (
     <Stack screenOptions={{ headerShown: true }}>

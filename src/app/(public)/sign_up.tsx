@@ -23,7 +23,7 @@ import * as Yup from "yup";
 const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [verifying, setVerifying] = useState(true);
+  const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const { t } = useTranslation();
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -33,9 +33,11 @@ const SignUpScreen = () => {
   const handleSignUpEmail = async ({
     email,
     password,
+    displayName,
   }: {
     email: string;
     password: string;
+    displayName: string;
   }) => {
     try {
       if (!isLoaded) return;
@@ -49,6 +51,9 @@ const SignUpScreen = () => {
       await signUp.create({
         emailAddress: email,
         password,
+        unsafeMetadata: {
+          displayName,
+        },
       });
 
       await signUp.prepareEmailAddressVerification({
@@ -65,6 +70,7 @@ const SignUpScreen = () => {
 
   const handleVerify = async () => {
     try {
+      setLoading(true);
       if (!isLoaded) return;
 
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
@@ -79,8 +85,11 @@ const SignUpScreen = () => {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
     } catch (error: any) {
+      setLoading(false);
       //console.error("Verification error:", err);
       showToast("error", "Error", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,13 +133,14 @@ const SignUpScreen = () => {
         />
         <Formik
           initialValues={{
-            email: "",
-            password: "",
-            confirmNewPassword: "",
-            displayName: "",
+            email: "omkahub@gmail.com",
+            password: "Ug4586@#",
+            confirmNewPassword: "Ug4586@#",
+            displayName: "Mohamed Abdikafi",
           }}
           validationSchema={SignUpValidationSchema}
           onSubmit={handleSignUpEmail}
+          enableReinitialize
         >
           {({
             handleChange,

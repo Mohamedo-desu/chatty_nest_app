@@ -1,15 +1,20 @@
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
+import { appName } from "@/constants";
 import { Colors } from "@/constants/Colors";
+import { useUserStore } from "@/store/userStore";
+import { client } from "@/supabase/config";
+import { useUser } from "@clerk/clerk-expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import {
   Alert,
-  Image,
   Platform,
   ScrollView,
   Text,
@@ -24,43 +29,102 @@ import * as Yup from "yup";
 // Define form values interface (bio added)
 interface EditProfileFormValues {
   displayName: string;
-  username: string;
-  birthdate: string;
+  userName: string;
+  birthDate: string;
   bio: string;
 }
 
 // Validation schema (bio is optional)
 const validationSchema = Yup.object().shape({
   displayName: Yup.string().required("Display name is required"),
-  username: Yup.string()
-    .matches(/^\S*$/, "Username should not contain white space")
-    .required("Username is required"),
-  birthdate: Yup.string().required("Birthdate is required"),
-  bio: Yup.string(), // Optional bio field
+  userName: Yup.string()
+    .matches(/^\S*$/, "UserName should not contain white space")
+    .required("UserName is required"),
+  birthDate: Yup.string().required("BirthDate is required"),
+  bio: Yup.string(),
 });
 
 const EditProfile: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-  const [profileImage, setProfileImage] = useState<string>("");
-  const [coverImage, setCoverImage] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
-  // Moves a local image to the "chattyNest Images" directory
-  const moveImageToChattyNest = async (uri: string): Promise<string> => {
-    try {
-      const directory = FileSystem.documentDirectory + "chattyNest Images/";
-      const dirInfo = await FileSystem.getInfoAsync(directory);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-      }
-      const fileName = uri.split("/").pop();
-      const newUri = directory + fileName;
-      await FileSystem.moveAsync({ from: uri, to: newUri });
-      return newUri;
-    } catch (error) {
-      console.error("Error moving image:", error);
-      return uri; // fallback to original uri if moving fails
+  const { user } = useUser();
+  const userId = user?.id;
+  const setCurrentUser = useUserStore((state) => state.setCurrentUser);
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  const [profileImage, setProfileImage] = useState<string>(
+    currentUser.photo_url || ""
+  );
+  const [coverImage, setCoverImage] = useState<string>(
+    currentUser.cover_url || ""
+  );
+
+  // Returns MIME type based on file extension
+  const getMimeType = (fileName: string): string => {
+    const ext = fileName.split(".").pop()?.toLowerCase();
+    switch (ext) {
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "gif":
+        return "image/gif";
+      default:
+        return "image/jpeg";
     }
+  };
+
+  // Prepares a local copy of the image by either moving (if already local) or downloading (if remote)
+  const prepareLocalImage = async (
+    uri: string,
+    folder: string
+  ): Promise<string> => {
+    if (!userId) throw new Error("User not logged in");
+    const directory =
+      FileSystem.documentDirectory + `${appName}/images/${userId}/${folder}/`;
+    const dirInfo = await FileSystem.getInfoAsync(directory);
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
+    }
+    const fileName = uri.split("/").pop() || "image";
+    const destinationUri = directory + fileName;
+    if (uri.startsWith("file://")) {
+      // If the image is already local, move it to our folder.
+      await FileSystem.moveAsync({ from: uri, to: destinationUri });
+      return destinationUri;
+    } else {
+      // If remote, download the image to the destination.
+      const downloaded = await FileSystem.downloadAsync(uri, destinationUri);
+      return downloaded.uri;
+    }
+  };
+
+  // Reusable function to upload an image to Supabase Storage.
+  // It uploads the image to images/{userId}/{folder}/{fileName} and returns its public URL.
+  const uploadImage = async (
+    uri: string,
+    folder: string,
+    fileName: string
+  ): Promise<string> => {
+    const localUri = await prepareLocalImage(uri, folder);
+    // Read the file as a base64 string and decode it
+    const base64Data = await FileSystem.readAsStringAsync(localUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const fileData = decode(base64Data);
+    const mimeType = getMimeType(fileName);
+    const storagePath = `${userId}/${folder}/${fileName}`;
+    const { error } = await client.storage
+      .from("images")
+      .upload(storagePath, fileData, { contentType: mimeType, upsert: true });
+    if (error) {
+      throw error;
+    }
+    const { data } = client.storage.from("images").getPublicUrl(storagePath);
+    return data.publicUrl;
   };
 
   // Prompts the user to pick an image and updates the provided state setter
@@ -71,43 +135,103 @@ const EditProfile: React.FC = () => {
       {
         text: "Camera",
         onPress: async () => {
-          const cameraPermission =
-            await ImagePicker.requestCameraPermissionsAsync();
-          if (!cameraPermission.granted) {
+          const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+          if (!granted) {
             Alert.alert("Permission to access camera is required!");
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            quality: 0.5,
+            mediaTypes: ["images"],
+            allowsEditing: false,
+            aspect: [4, 3],
+            quality: 0.7,
+            base64: true,
           });
-          if (!result.canceled && result.assets && result.assets.length > 0) {
-            const newUri = await moveImageToChattyNest(result.assets[0].uri);
-            setImage(newUri);
+          if (!result.canceled && result.assets?.length) {
+            setImage(result.assets[0].uri);
           }
         },
       },
       {
         text: "Gallery",
         onPress: async () => {
-          const libraryPermission =
+          const { granted } =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (!libraryPermission.granted) {
+          if (!granted) {
             Alert.alert("Permission to access gallery is required!");
             return;
           }
           const result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            quality: 0.5,
+            mediaTypes: ["images"],
+            allowsEditing: false,
+            aspect: [4, 3],
+            quality: 0.7,
+            base64: true,
           });
-          if (!result.canceled && result.assets && result.assets.length > 0) {
-            const newUri = await moveImageToChattyNest(result.assets[0].uri);
-            setImage(newUri);
+          if (!result.canceled && result.assets?.length) {
+            setImage(result.assets[0].uri);
           }
         },
       },
       { text: "Cancel", style: "cancel" },
     ]);
+  };
+
+  // Handle form submission: upload images and update user profile
+  const handleFormSubmit = async (
+    values: EditProfileFormValues,
+    { resetForm }: FormikHelpers<EditProfileFormValues>
+  ) => {
+    try {
+      setLoading(true);
+      let profileImageUrl = "";
+      let coverImageUrl = "";
+
+      if (profileImage) {
+        const ext = profileImage.split(".").pop() || "png";
+        profileImageUrl = await uploadImage(
+          profileImage,
+          "avatars",
+          `${profileImage.split("/").pop()}.${ext}`
+        );
+        console.log("Profile image URL:", profileImageUrl);
+      }
+      if (coverImage) {
+        const ext = coverImage.split(".").pop() || "png";
+        coverImageUrl = await uploadImage(
+          coverImage,
+          "cover",
+          `${coverImage.split("/").pop()}.${ext}`
+        );
+        console.log("Cover image URL:", coverImageUrl);
+      }
+
+      console.log("Form values:", values);
+
+      const { data, error } = await client
+        .from("users")
+        .update({
+          display_name: values.displayName,
+          user_name: values.userName,
+          user_bio: values.bio,
+          birth_date: values.birthDate,
+          photo_url: profileImageUrl,
+          cover_url: coverImageUrl,
+        })
+        .eq("user_id", userId)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setCurrentUser(data);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      Alert.alert("Error", "There was an error updating your profile.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -117,14 +241,18 @@ const EditProfile: React.FC = () => {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ flexGrow: 1, paddingBottom: moderateScale(20) }}
     >
-      {/* Profile and Cover Image Pickers */}
+      {/* Image Pickers */}
       <View style={styles.imageContainer}>
         <TouchableOpacity
           style={styles.imagePicker}
           onPress={() => selectImage(setProfileImage)}
         >
           {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.imagePreview} />
+            <Image
+              source={{ uri: profileImage }}
+              style={styles.imagePreview}
+              contentFit="cover"
+            />
           ) : (
             <CustomText style={styles.imagePlaceholder} variant="h7">
               Select Profile Image
@@ -136,7 +264,11 @@ const EditProfile: React.FC = () => {
           onPress={() => selectImage(setCoverImage)}
         >
           {coverImage ? (
-            <Image source={{ uri: coverImage }} style={styles.imagePreview} />
+            <Image
+              source={{ uri: coverImage }}
+              style={styles.imagePreview}
+              contentFit="cover"
+            />
           ) : (
             <CustomText style={styles.imagePlaceholder} variant="h7">
               Select Cover Image
@@ -148,22 +280,14 @@ const EditProfile: React.FC = () => {
       {/* Form Fields */}
       <Formik
         initialValues={{
-          displayName: "",
-          username: "",
-          birthdate: "",
-          bio: "",
+          displayName: currentUser.display_name || "",
+          userName: currentUser.user_name || "",
+          birthDate: currentUser.birth_date || "",
+          bio: currentUser.user_bio || "",
         }}
         validationSchema={validationSchema}
-        onSubmit={(
-          values: EditProfileFormValues,
-          helpers: FormikHelpers<EditProfileFormValues>
-        ) => {
-          // Handle form submission (e.g., API call)
-          console.log("Form values:", values);
-          console.log("Profile Image:", profileImage);
-          console.log("Cover Image:", coverImage);
-          helpers.resetForm();
-        }}
+        onSubmit={handleFormSubmit}
+        enableReinitialize
       >
         {({
           handleChange,
@@ -187,14 +311,13 @@ const EditProfile: React.FC = () => {
             />
             <CustomInput
               placeholder="User Name"
-              errors={errors.username}
-              touched={touched.username}
-              value={values.username}
-              handleChange={handleChange("username")}
-              handleBlur={handleBlur("username")}
+              errors={errors.userName}
+              touched={touched.userName}
+              value={values.userName}
+              handleChange={handleChange("userName")}
+              handleBlur={handleBlur("userName")}
               rightIcon="account"
             />
-            {/* Bio Editor */}
             <CustomInput
               placeholder="Bio"
               errors={errors.bio}
@@ -204,30 +327,29 @@ const EditProfile: React.FC = () => {
               handleBlur={handleBlur("bio")}
               style={{ height: moderateScale(80) }}
             />
-            {/* Birthdate Picker */}
             <TouchableOpacity
               style={[styles.input, { justifyContent: "center" }]}
               onPress={() => setShowDatePicker(true)}
             >
               <CustomText
                 style={{
-                  color: values.birthdate
+                  color: values.birthDate
                     ? theme.Colors.typography
                     : theme.Colors.gray[400],
                   fontSize: RFValue(16),
                 }}
                 variant="h7"
               >
-                {values.birthdate ? values.birthdate : "Select Birthdate"}
+                {values.birthDate || "Select BirthDate"}
               </CustomText>
             </TouchableOpacity>
-            {touched.birthdate && errors.birthdate && (
-              <Text style={styles.errorText}>{errors.birthdate}</Text>
+            {touched.birthDate && errors.birthDate && (
+              <Text style={styles.errorText}>{errors.birthDate}</Text>
             )}
             {showDatePicker && (
               <DateTimePicker
                 value={
-                  values.birthdate ? new Date(values.birthdate) : new Date()
+                  values.birthDate ? new Date(values.birthDate) : new Date()
                 }
                 mode="date"
                 display={Platform.OS === "ios" ? "spinner" : "default"}
@@ -237,15 +359,19 @@ const EditProfile: React.FC = () => {
                     setShowDatePicker(false);
                   }
                   if (selectedDate) {
-                    const formattedDate = selectedDate
-                      .toISOString()
-                      .split("T")[0];
-                    setFieldValue("birthdate", formattedDate);
+                    setFieldValue(
+                      "birthDate",
+                      selectedDate.toISOString().split("T")[0]
+                    );
                   }
                 }}
               />
             )}
-            <CustomButton text="Save" onPress={handleSubmit} />
+            <CustomButton
+              text="Save"
+              onPress={handleSubmit}
+              loading={loading}
+            />
           </View>
         )}
       </Formik>

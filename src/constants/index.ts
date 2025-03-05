@@ -1,1 +1,1 @@
-export const appName = "Chatty Nest - Meet People";
+export const appName = "ChattyNest";

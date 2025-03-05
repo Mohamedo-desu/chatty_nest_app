@@ -1,5 +1,6 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
+import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
@@ -22,7 +23,7 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 const SettingsScreen = () => {
   const { styles, theme } = useStyles(stylesheet);
-
+  const { signOut } = useAuth();
   // Define settings sections and items
   const sections = [
     {
@@ -143,6 +144,7 @@ const SettingsScreen = () => {
           icon: ArrowLeftOnRectangleIcon,
           onPress: () => {
             // Handle logout
+            signOut();
           },
         },
       ],
