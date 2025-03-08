@@ -16,7 +16,11 @@ import { View } from "react-native";
 import * as Yup from "yup";
 
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { createStyleSheet, useStyles } from "react-native-unistyles";
+import {
+  createStyleSheet,
+  UnistylesRuntime,
+  useStyles,
+} from "react-native-unistyles";
 
 const SigninScreen = () => {
   const [email, setEmail] = useState("");
@@ -97,6 +101,9 @@ const SigninScreen = () => {
       .label(t("validation.password")),
   });
 
+  useEffect(() => {
+    UnistylesRuntime.setImmersiveMode(false);
+  }, []);
   return (
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps="handled"

@@ -61,7 +61,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
                 <ChatBubbleLeftRightIcon
                   strokeWidth={1.2}
                   color={Colors.white}
-                  size={RFValue(20)}
+                  size={RFValue(25)}
                 />
               </TouchableOpacity>
             </Animated.View>
@@ -73,7 +73,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
               <TouchableOpacity
                 onPress={() => router.navigate("/(authenticated)/add_post")}
               >
-                <PlusIcon color={Colors.white} size={RFValue(20)} />
+                <PlusIcon color={Colors.white} size={RFValue(25)} />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -129,7 +129,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
                   accessibilityRole="button"
                   accessibilityState={isFocused ? { selected: true } : {}}
                   style={styles.tabBarItemStyle}
-                  hitSlop={50}
+                  hitSlop={10}
                 >
                   {icon}
                   <CustomText
@@ -191,7 +191,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   },
   fabContainer: {
     backgroundColor: theme.Colors.primary,
-    height: 45,
+    height: 50,
     aspectRatio: 1,
     bottom: rt.insets.bottom + 45,
     borderRadius: 100,

@@ -7,7 +7,7 @@ import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import useTimer from "@/hooks/useTimer";
 import { useSignIn } from "@clerk/clerk-expo";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -101,6 +101,7 @@ const ResetPasswordScreen = () => {
       .trim()
       .oneOf([Yup.ref("newPassword")], t("validation.passwordMatch")),
   });
+  const navigation = useNavigation();
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(

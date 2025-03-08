@@ -23,4 +23,5 @@ export const Colors = {
     100: "#1B1B1B",
     50: "#1b1a1a",
   },
+  gradient: ["#d400ff", "#640d75"] as const,
 };

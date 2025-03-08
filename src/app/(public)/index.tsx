@@ -1,19 +1,24 @@
 import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
 import LanguageModal from "@/components/ui/LanguageModal";
-import { appName } from "@/constants";
+import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { TouchableOpacity, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
-import { createStyleSheet, useStyles } from "react-native-unistyles";
+import {
+  createStyleSheet,
+  UnistylesRuntime,
+  useStyles,
+} from "react-native-unistyles";
 
 const HEADER_ICON_SIZE = RFValue(12);
 
@@ -28,8 +33,12 @@ const OnboardingScreen = () => {
     handleChangeLanguage,
   } = useLanguage();
 
+  useEffect(() => {
+    UnistylesRuntime.setImmersiveMode(true);
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={Colors.gradient} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -54,22 +63,12 @@ const OnboardingScreen = () => {
       </View>
 
       {/* Content */}
-      <Image
-        source={require("@/assets/icons/Android-Dev.png")}
-        contentFit="cover"
-        style={styles.image}
-      />
 
-      <CustomText fontFamily={Fonts.Bold} style={styles.appName}>
-        {appName}
-      </CustomText>
-      <CustomText
-        variant="h5"
-        fontFamily={Fonts.Regular}
-        style={styles.appDesc}
-      >
-        {t("onboarding.description")}
-      </CustomText>
+      <Image
+        source={require("@/assets/images/chatbot.png")}
+        style={styles.image}
+        contentFit="fill"
+      />
 
       <CustomButton
         text={t("onboarding.get_started")}
@@ -85,7 +84,7 @@ const OnboardingScreen = () => {
         languages={languages}
         onLanguageSelect={handleChangeLanguage}
       />
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -114,9 +113,8 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     gap: 5,
   },
   image: {
-    width: moderateScale(200),
+    width: moderateScale(300),
     aspectRatio: 1,
-    marginVertical: 20,
   },
   headerText: {
     fontSize: RFValue(14),
@@ -134,11 +132,13 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   button: {
     position: "absolute",
     bottom: 35,
-    borderRadius: theme.border.sm,
+    borderRadius: theme.border.full,
+    backgroundColor: theme.Colors.white,
   },
   buttonText: {
     fontFamily: Fonts.SemiBold,
-    fontSize: RFValue(16),
+    fontSize: RFValue(18),
+    color: theme.Colors.primary,
   },
   flagIcon: {},
 }));

@@ -51,7 +51,6 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <ChatBubbleOvalLeftEllipsisIcon color={color} size={size} />
           ),
-
           tabBarLabel: "Chats",
           tabBarBadge: 5,
         }}

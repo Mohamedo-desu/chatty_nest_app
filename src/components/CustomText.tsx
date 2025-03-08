@@ -1,51 +1,27 @@
 import { Fonts } from "@/constants/Fonts";
-import React, { FC, ReactNode } from "react";
-import { Platform, Text, TextStyle } from "react-native";
+import React, { FC } from "react";
+import { Platform, Text, TextProps, TextStyle } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 type Variant = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "h7";
 type PlatformType = "ios" | "android";
 
-interface CustomTextProps {
+// Extend TextProps so that any valid text prop is allowed
+interface CustomTextProps extends TextProps {
   variant?: Variant;
   fontFamily?: Fonts;
   fontSize?: number;
-  children?: ReactNode;
-  numberOfLines?: number;
-  style?: TextStyle | TextStyle[];
-  onLayout?: (event: any) => void;
 }
 
 const fontSizeMap: Record<Variant, Record<PlatformType, number>> = {
-  h1: {
-    android: 24,
-    ios: 22,
-  },
-  h2: {
-    android: 22,
-    ios: 20,
-  },
-  h3: {
-    android: 20,
-    ios: 18,
-  },
-  h4: {
-    android: 18,
-    ios: 16,
-  },
-  h5: {
-    android: 16,
-    ios: 14,
-  },
-  h6: {
-    android: 12,
-    ios: 10,
-  },
-  h7: {
-    android: 10,
-    ios: 9,
-  },
+  h1: { android: 24, ios: 22 },
+  h2: { android: 22, ios: 20 },
+  h3: { android: 20, ios: 18 },
+  h4: { android: 18, ios: 16 },
+  h5: { android: 16, ios: 14 },
+  h6: { android: 12, ios: 10 },
+  h7: { android: 10, ios: 9 },
 };
 
 const CustomText: FC<CustomTextProps> = ({
@@ -54,12 +30,10 @@ const CustomText: FC<CustomTextProps> = ({
   fontSize,
   style,
   children,
-  numberOfLines,
-  onLayout,
-
   ...props
 }) => {
   const { styles } = useStyles(stylesheet);
+
   let computedFontSize: number =
     Platform.OS === "android"
       ? RFValue(fontSize || 12)
@@ -70,22 +44,16 @@ const CustomText: FC<CustomTextProps> = ({
     computedFontSize = RFValue(fontSize || defaultSize);
   }
 
-  const fontFamilyStyle: TextStyle = {
-    fontFamily,
-  };
+  const fontFamilyStyle: TextStyle = { fontFamily };
 
   return (
     <Text
-      onLayout={onLayout}
       style={[
         styles.text,
-        {
-          fontSize: computedFontSize,
-        },
+        { fontSize: computedFontSize },
         fontFamilyStyle,
         style,
       ]}
-      numberOfLines={numberOfLines !== undefined ? numberOfLines : undefined}
       {...props}
     >
       {children}

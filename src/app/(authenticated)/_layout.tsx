@@ -43,12 +43,7 @@ const AuthenticatedLayout = () => {
           headerTitle: "Edit Profile",
         }}
       />
-      <Stack.Screen
-        name="change_password"
-        options={{
-          headerTitle: "Change Password",
-        }}
-      />
+
       <Stack.Screen
         name="privacy_settings"
         options={{
