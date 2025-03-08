@@ -63,6 +63,12 @@ const AuthenticatedLayout = () => {
         }}
       />
       <Stack.Screen
+        name="add_post"
+        options={{
+          headerTitle: "Add New Post",
+        }}
+      />
+      <Stack.Screen
         name="(tabs)"
         options={{
           headerShown: false,
