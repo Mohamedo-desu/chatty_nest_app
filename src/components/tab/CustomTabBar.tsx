@@ -61,7 +61,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
                 <ChatBubbleLeftRightIcon
                   strokeWidth={1.2}
                   color={Colors.white}
-                  size={RFValue(25)}
+                  size={RFValue(20)}
                 />
               </TouchableOpacity>
             </Animated.View>
@@ -73,7 +73,7 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
               <TouchableOpacity
                 onPress={() => router.navigate("/(authenticated)/add_post")}
               >
-                <PlusIcon color={Colors.white} size={RFValue(25)} />
+                <PlusIcon color={Colors.white} size={RFValue(20)} />
               </TouchableOpacity>
             </Animated.View>
           )}

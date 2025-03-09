@@ -24,8 +24,7 @@ const RichTextEditor = ({ editorRef, bodyRef, loading, file, onChange }) => {
           actions.alignLeft,
           actions.alignCenter,
           actions.alignRight,
-          actions.insertLink,
-          actions.code,
+          actions.undo,
           actions.line,
           actions.heading1,
           actions.heading4,
@@ -37,6 +36,9 @@ const RichTextEditor = ({ editorRef, bodyRef, loading, file, onChange }) => {
           ),
           [actions.heading4]: ({ tintColor }) => (
             <CustomText style={{ color: tintColor }}>H4</CustomText>
+          ),
+          [actions.setParagraph]: ({ tintColor }) => (
+            <CustomText style={{ color: tintColor }}>P</CustomText>
           ),
         }}
         style={styles.richBar}
