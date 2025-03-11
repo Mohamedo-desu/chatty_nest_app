@@ -1,19 +1,14 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
-import { getStoredValues, saveSecurely } from "@/store/storage";
-import i18next from "i18next";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/hooks/useLanguage"; // Adjust the path as needed
+import { Stack } from "expo-router";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
-
-interface LanguageOption {
-  code: string;
-  name: string;
-  flag: string;
-}
 
 interface ListItemProps {
   title: string;
@@ -25,57 +20,9 @@ interface ListItemProps {
 
 const LanguageSettings: React.FC = () => {
   const { styles } = useStyles(stylesheet);
+  const { languages, selectedLanguage, handleChangeLanguage } = useLanguage();
 
-  const languageOptions: LanguageOption[] = useMemo(
-    () => [
-      { code: "en-UK", name: "English", flag: "GB" },
-      { code: "ar", name: "Arabic", flag: "SA" },
-      { code: "zh", name: "Chinese", flag: "CN" },
-      { code: "fr", name: "French", flag: "FR" },
-      { code: "de", name: "German", flag: "DE" },
-      { code: "hi", name: "Hindi", flag: "IN" },
-      { code: "it", name: "Italian", flag: "IT" },
-      { code: "ja", name: "Japanese", flag: "JP" },
-      { code: "ko", name: "Korean", flag: "KR" },
-      { code: "pt", name: "Portuguese", flag: "PT" },
-      { code: "ru", name: "Russian", flag: "RU" },
-      { code: "so", name: "Somali", flag: "SO" },
-      { code: "es", name: "Spanish", flag: "ES" },
-      { code: "sw", name: "Kiswahili", flag: "KE" },
-    ],
-    []
-  );
-
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(
-    languageOptions[0]
-  );
-
-  // Load the saved language on component mount
-  useEffect(() => {
-    const loadLanguage = async () => {
-      try {
-        const { language } = await getStoredValues(["language"]);
-        if (language) {
-          const savedLanguage: LanguageOption = JSON.parse(language);
-          setSelectedLanguage(savedLanguage);
-          i18next.changeLanguage(savedLanguage.code, (err: Error | null) => {
-            if (err) console.error("Error loading language:", err);
-          });
-        }
-      } catch (error) {
-        console.error("Failed to load saved language", error);
-      }
-    };
-    loadLanguage();
-  }, []);
-
-  const handleChangeLanguage = useCallback((language: LanguageOption) => {
-    i18next.changeLanguage(language.code, (err: Error | null) => {
-      if (err) console.error("Error loading language:", err);
-    });
-    setSelectedLanguage(language);
-    saveSecurely([{ key: "language", value: JSON.stringify(language) }]);
-  }, []);
+  const { t } = useTranslation();
 
   const ListItem: React.FC<ListItemProps> = ({
     title,
@@ -102,28 +49,35 @@ const LanguageSettings: React.FC = () => {
   );
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={styles.contentContainer}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.sectionContainer}>
-        <CustomText style={styles.sectionTitle} variant="h6">
-          Choose your preferred language
-        </CustomText>
-        {languageOptions.map((option, index) => (
-          <ListItem
-            key={index}
-            title={option.name}
-            code={option.code}
-            flag={option.flag}
-            selected={selectedLanguage.code === option.code}
-            onPress={() => handleChangeLanguage(option)}
-          />
-        ))}
-      </View>
-    </ScrollView>
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: t("languageSettings.headerTitle"),
+        }}
+      />
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sectionContainer}>
+          <CustomText style={styles.sectionTitle} variant="h6">
+            {t("languageSettings.title")}
+          </CustomText>
+          {languages.map((option, index) => (
+            <ListItem
+              key={index}
+              title={option.name}
+              code={option.code}
+              flag={option.flag}
+              selected={selectedLanguage.code === option.code}
+              onPress={() => handleChangeLanguage(option)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </>
   );
 };
 

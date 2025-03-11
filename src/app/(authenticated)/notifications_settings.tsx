@@ -5,7 +5,9 @@ import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
+import { Stack } from "expo-router";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
@@ -19,11 +21,12 @@ interface ListItemData {
 
 const Notifications: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { t } = useTranslation();
   const { user } = useUser();
   const userId = user?.id;
   const { notificationSettings, setNotificationSettings } = useSettingsStore();
 
-  // This function uses upsert so that if no row exists, it gets inserted.
+  // Update setting in Supabase using upsert.
   const updateSettingInSupabase = async (
     field: keyof typeof notificationSettings,
     value: boolean
@@ -34,7 +37,7 @@ const Notifications: React.FC = () => {
       .from("notification_settings")
       .upsert(updatePayload, { onConflict: "user_id" });
     if (error) {
-      showToast("error", "Error", error.message);
+      showToast("error", t("common.error"), error.message);
     }
   };
 
@@ -73,7 +76,7 @@ const Notifications: React.FC = () => {
         });
       }
     } catch (error: any) {
-      showToast("error", "Error", error.message);
+      showToast("error", t("common.error"), error.message);
     }
   };
 
@@ -81,73 +84,73 @@ const Notifications: React.FC = () => {
     fetchNotificationSettings();
   }, [userId]);
 
-  // Define sections using values from the store.
+  // Define sections with translation keys.
   const sections: { title: string; data: ListItemData[] }[] = [
     {
-      title: "General Notifications",
+      title: t("notificationsScreen.generalNotifications"),
       data: [
         {
-          title: "Push Notifications",
+          title: t("notificationsScreen.pushNotifications"),
           value: notificationSettings.push_notifications,
           onValueChange: handleToggle("push_notifications"),
         },
         {
-          title: "Email Notifications",
+          title: t("notificationsScreen.emailNotifications"),
           value: notificationSettings.email_notifications,
           onValueChange: handleToggle("email_notifications"),
         },
         {
-          title: "SMS Notifications",
+          title: t("notificationsScreen.smsNotifications"),
           value: notificationSettings.sms_notifications,
           onValueChange: handleToggle("sms_notifications"),
         },
       ],
     },
     {
-      title: "Social Activity",
+      title: t("notificationsScreen.socialActivity"),
       data: [
         {
-          title: "Likes",
+          title: t("notificationsScreen.likes"),
           value: notificationSettings.likes_notifications,
           onValueChange: handleToggle("likes_notifications"),
         },
         {
-          title: "Comments",
+          title: t("notificationsScreen.comments"),
           value: notificationSettings.comments_notifications,
           onValueChange: handleToggle("comments_notifications"),
         },
         {
-          title: "Mentions",
+          title: t("notificationsScreen.mentions"),
           value: notificationSettings.mentions_notifications,
           onValueChange: handleToggle("mentions_notifications"),
         },
         {
-          title: "Friend Requests",
+          title: t("notificationsScreen.friendRequests"),
           value: notificationSettings.friend_requests_notifications,
           onValueChange: handleToggle("friend_requests_notifications"),
         },
         {
-          title: "Direct Messages",
+          title: t("notificationsScreen.directMessages"),
           value: notificationSettings.direct_messages_notifications,
           onValueChange: handleToggle("direct_messages_notifications"),
         },
         {
-          title: "Group Notifications",
+          title: t("notificationsScreen.groupNotifications"),
           value: notificationSettings.group_notifications,
           onValueChange: handleToggle("group_notifications"),
         },
       ],
     },
     {
-      title: "Sound & Vibration",
+      title: t("notificationsScreen.soundAndVibration"),
       data: [
         {
-          title: "Notification Sound",
+          title: t("notificationsScreen.notificationSound"),
           value: notificationSettings.notification_sound,
           onValueChange: handleToggle("notification_sound"),
         },
         {
-          title: "Vibrate on Notification",
+          title: t("notificationsScreen.vibrateOnNotification"),
           value: notificationSettings.vibrate_on_notification,
           onValueChange: handleToggle("vibrate_on_notification"),
         },
@@ -176,28 +179,35 @@ const Notifications: React.FC = () => {
   );
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={styles.contentContainer}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      {sections.map((section, sectionIndex) => (
-        <View key={sectionIndex} style={styles.sectionContainer}>
-          <CustomText style={styles.sectionTitle} variant="h6">
-            {section.title}
-          </CustomText>
-          {section.data.map((item, itemIndex) => (
-            <ListItem
-              key={itemIndex}
-              title={item.title}
-              value={item.value}
-              onValueChange={item.onValueChange}
-            />
-          ))}
-        </View>
-      ))}
-    </ScrollView>
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: t("notificationsScreen.headerTitle"),
+        }}
+      />
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {sections.map((section, sectionIndex) => (
+          <View key={sectionIndex} style={styles.sectionContainer}>
+            <CustomText style={styles.sectionTitle} variant="h6">
+              {section.title}
+            </CustomText>
+            {section.data.map((item, itemIndex) => (
+              <ListItem
+                key={itemIndex}
+                title={item.title}
+                value={item.value}
+                onValueChange={item.onValueChange}
+              />
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+    </>
   );
 };
 

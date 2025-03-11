@@ -2,8 +2,7 @@ import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Colors } from "@/constants/Colors";
-import { getSupabaseFileUrl } from "@/services/imageServices";
-import { createOrUpdatePost } from "@/services/postService";
+
 import { useUserStore } from "@/store/userStore";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
@@ -69,7 +68,7 @@ const AddNewPostScreen: React.FC = () => {
       };
 
       setLoading(true);
-      let res = await createOrUpdatePost(data);
+
       setLoading(false);
       console.log("res", res);
     } catch (error) {
@@ -101,7 +100,7 @@ const AddNewPostScreen: React.FC = () => {
     if (isLocalFile(file)) {
       return file.uri;
     }
-    return getSupabaseFileUrl(file)?.uri;
+    return;
   };
 
   return (
@@ -158,7 +157,7 @@ const AddNewPostScreen: React.FC = () => {
         </View>
       )}
       <View style={styles.mediaContainer}>
-        <CustomText>Add to your post</CustomText>
+        <CustomText style={styles.mediaText}>Add to your post</CustomText>
         <View style={styles.mediaIcons}>
           <TouchableOpacity onPress={() => onPick(true)}>
             <PhotoIcon size={RFValue(30)} color={theme.Colors.typography} />
@@ -171,7 +170,8 @@ const AddNewPostScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <CustomButton text="Submit" loading={loading} onPress={onSubmit} />
+      <View style={styles.spacer} />
+      <CustomButton text="Post" loading={loading} onPress={onSubmit} />
     </View>
   );
 };
@@ -184,6 +184,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     backgroundColor: theme.Colors.background,
     padding: 15,
     gap: 10,
+    paddingBottom: rt.insets.bottom + 10,
   },
   photoContainer: {
     width: moderateScale(40),
@@ -208,15 +209,14 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     marginTop: 20,
   },
   mediaContainer: {
+    backgroundColor: theme.Colors.gray[100],
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginTop: 10,
-    padding: 12,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    borderCurve: "continuous",
-    borderColor: theme.Colors.gray[200],
+    padding: 10,
+    borderRadius: 8,
+  },
+  mediaText: {
+    flex: 1,
   },
   mediaIcons: {
     flexDirection: "row",
@@ -239,5 +239,8 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     backgroundColor: "rgba(0,0,0,0.2)",
     padding: 5,
     borderRadius: 100,
+  },
+  spacer: {
+    flex: 1,
   },
 }));

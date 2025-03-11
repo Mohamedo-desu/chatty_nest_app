@@ -3,7 +3,8 @@ import { Fonts } from "@/constants/Fonts";
 import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import {
   ArrowLeftOnRectangleIcon,
   BellIcon,
@@ -23,13 +24,16 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 const SettingsScreen = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { signOut } = useAuth();
+
+  const { t } = useTranslation();
+
   // Define settings sections and items
   const sections = [
     {
-      title: "Account",
+      title: t("SettingsPage.account"),
       data: [
         {
-          title: "Profile",
+          title: t("SettingsPage.profile"),
           icon: UserIcon,
           onPress: () => {
             // Navigate to profile settings
@@ -39,10 +43,10 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "Privacy",
+      title: t("SettingsPage.privacy"),
       data: [
         {
-          title: "Privacy Settings",
+          title: t("SettingsPage.privacySettings"),
           icon: ShieldCheckIcon,
           onPress: () => {
             // Navigate to privacy settings
@@ -52,10 +56,10 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "Notifications",
+      title: t("SettingsPage.notifications"),
       data: [
         {
-          title: "Push Notifications",
+          title: t("SettingsPage.pushNotifications"),
           icon: BellIcon,
           onPress: () => {
             // Navigate to notifications settings
@@ -65,10 +69,10 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "Data & Storage",
+      title: t("SettingsPage.dataAndStorage"),
       data: [
         {
-          title: "Data Usage",
+          title: t("SettingsPage.dataUsage"),
           icon: DocumentTextIcon,
           onPress: () => {
             // Navigate to data usage details
@@ -78,10 +82,10 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "General",
+      title: t("SettingsPage.general"),
       data: [
         {
-          title: "Theme",
+          title: t("SettingsPage.theme"),
           icon: MoonIcon,
           onPress: () => {
             // Navigate to language selection
@@ -89,7 +93,7 @@ const SettingsScreen = () => {
           },
         },
         {
-          title: "Language",
+          title: t("SettingsPage.language"),
           icon: GlobeAltIcon,
           onPress: () => {
             // Navigate to language selection
@@ -97,7 +101,7 @@ const SettingsScreen = () => {
           },
         },
         {
-          title: "About",
+          title: t("SettingsPage.about"),
           icon: InformationCircleIcon,
           onPress: () => {
             // Navigate to about screen
@@ -107,10 +111,10 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "Support",
+      title: t("SettingsPage.support"),
       data: [
         {
-          title: "Help Center",
+          title: t("SettingsPage.helpCenter"),
           icon: InformationCircleIcon,
           onPress: () => {
             // Navigate to help center
@@ -118,7 +122,7 @@ const SettingsScreen = () => {
           },
         },
         {
-          title: "Report a Problem",
+          title: t("SettingsPage.reportProblem"),
           icon: ExclamationTriangleIcon,
           onPress: () => {
             // Navigate to report problem
@@ -128,14 +132,28 @@ const SettingsScreen = () => {
       ],
     },
     {
-      title: "Other",
+      title: t("SettingsPage.other"),
       data: [
         {
-          title: "Logout",
+          title: t("SettingsPage.logOut"),
           icon: ArrowLeftOnRectangleIcon,
           onPress: () => {
             // Handle logout
-            signOut();
+            Alert.alert(
+              t("SettingsPage.alertLogoutTitle"),
+              t("SettingsPage.alertLogoutDescription"),
+              [
+                {
+                  text: t("SettingsPage.alertLogoutYes"),
+                  onPress: () => signOut(),
+                },
+                {
+                  text: t("SettingsPage.alertLogoutNo"),
+                  onPress: undefined,
+                  style: "cancel",
+                },
+              ]
+            );
           },
         },
       ],
@@ -164,7 +182,7 @@ const SettingsScreen = () => {
                 >
                   <View style={styles.itemIconContainer}>
                     <IconComponent
-                      color={theme.Colors.primary}
+                      color={theme.Colors.typography}
                       width={RFValue(20)}
                       height={RFValue(20)}
                     />

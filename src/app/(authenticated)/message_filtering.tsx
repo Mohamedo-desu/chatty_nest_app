@@ -7,6 +7,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, TextInput, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
@@ -20,6 +21,7 @@ interface MessageFilteringSettings {
 
 const MessageFilteringScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { t } = useTranslation();
   const { user } = useUser();
   const userId = user?.id;
 
@@ -62,7 +64,7 @@ const MessageFilteringScreen: React.FC = () => {
       .upsert(payload, { onConflict: "user_id" });
     if (error) {
       console.error(`Error updating ${field}:`, error);
-      showToast("error", "Error", error.message);
+      showToast("error", t("common.error"), error.message);
     }
   };
 
@@ -88,7 +90,7 @@ const MessageFilteringScreen: React.FC = () => {
         setLocalBlockedKeywords((data.blocked_keywords || []).join(", "));
       }
     } catch (error: any) {
-      showToast("error", "Error", error.message);
+      showToast("error", t("common.error"), error.message);
     }
   };
 
@@ -128,7 +130,7 @@ const MessageFilteringScreen: React.FC = () => {
       {/* Toggle for filtering unknown senders */}
       <View style={styles.toggleContainer}>
         <CustomText style={styles.toggleLabel}>
-          Filter messages from unknown senders
+          {t("messageFilteringScreen.filterUnknownLabel")}
         </CustomText>
         <Switch
           value={messageFilteringSettings.filterUnknown}
@@ -148,7 +150,7 @@ const MessageFilteringScreen: React.FC = () => {
       {/* Toggle for filtering explicit content */}
       <View style={styles.toggleContainer}>
         <CustomText style={styles.toggleLabel}>
-          Filter messages with explicit language
+          {t("messageFilteringScreen.filterExplicitLabel")}
         </CustomText>
         <Switch
           value={messageFilteringSettings.filterExplicit}
@@ -167,19 +169,22 @@ const MessageFilteringScreen: React.FC = () => {
 
       {/* Blocked Keywords Input */}
       <CustomText style={styles.inputLabel}>
-        Blocked Keywords (comma separated)
+        {t("messageFilteringScreen.blockedKeywordsLabel")}
       </CustomText>
       <TextInput
         value={localBlockedKeywords}
         onChangeText={handleBlockedKeywordsChange}
         onBlur={handleBlockedKeywordsBlur}
-        placeholder="Enter keywords separated by commas"
+        placeholder={t("messageFilteringScreen.blockedKeywordsPlaceholder")}
         placeholderTextColor={theme.Colors.gray[400]}
         multiline
         style={styles.blockedKeywordsInput}
       />
 
-      <CustomButton text="Save Settings" onPress={handleBlockedKeywordsBlur} />
+      <CustomButton
+        text={t("messageFilteringScreen.saveSettings")}
+        onPress={handleBlockedKeywordsBlur}
+      />
     </ScrollView>
   );
 };
@@ -206,9 +211,9 @@ const stylesheet = createStyleSheet((theme) => ({
     marginBottom: moderateScale(16),
   },
   toggleLabel: {
+    color: theme.Colors.typography,
     fontSize: RFValue(14),
     fontFamily: Fonts.Regular,
-    color: theme.Colors.typography,
     flex: 1,
   },
   inputLabel: {

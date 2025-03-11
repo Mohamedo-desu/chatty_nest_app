@@ -5,8 +5,9 @@ import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, TouchableOpacity, View } from "react-native";
 import {
   BellIcon,
@@ -33,6 +34,8 @@ const PrivacyScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { user } = useUser();
   const userId = user?.id;
+
+  const { t } = useTranslation();
 
   // Access privacy settings from the existing settings store.
   const { privacySettings, setPrivacySettings } = useSettingsStore();
@@ -92,17 +95,17 @@ const PrivacyScreen: React.FC = () => {
   // Define sections using the values from the store.
   const sections: { title: string; data: PrivacyItem[] }[] = [
     {
-      title: "Account Privacy",
+      title: t("privacySettingsPage.accountPrivacy"),
       data: [
         {
-          title: "Private Account",
+          title: t("privacySettingsPage.privateAccount"),
           icon: ShieldCheckIcon,
           hasSwitch: true,
           value: privacySettings.private_account,
           onValueChange: handleToggle("private_account"),
         },
         {
-          title: "Activity Status",
+          title: t("privacySettingsPage.activityStatus"),
           icon: BellIcon,
           hasSwitch: true,
           value: privacySettings.activity_status,
@@ -111,17 +114,17 @@ const PrivacyScreen: React.FC = () => {
       ],
     },
     {
-      title: "Messaging Privacy",
+      title: t("privacySettingsPage.messagePrivacy"),
       data: [
         {
-          title: "Read Receipts",
+          title: t("privacySettingsPage.readReceipts"),
           icon: InformationCircleIcon,
           hasSwitch: true,
           value: privacySettings.read_receipts,
           onValueChange: handleToggle("read_receipts"),
         },
         {
-          title: "Message Filtering",
+          title: t("privacySettingsPage.messageFiltering"),
           icon: FunnelIcon,
           onPress: () => {
             router.navigate("/(authenticated)/message_filtering");
@@ -130,17 +133,17 @@ const PrivacyScreen: React.FC = () => {
       ],
     },
     {
-      title: "Blocking & Restrictions",
+      title: t("privacySettingsPage.blockingAndRestriction"),
       data: [
         {
-          title: "Blocked Accounts",
+          title: t("privacySettingsPage.blockedAccounts"),
           icon: NoSymbolIcon,
           onPress: () => {
             router.navigate("/(authenticated)/blocked_accounts");
           },
         },
         {
-          title: "Restricted Accounts",
+          title: t("privacySettingsPage.restrictedAccounts"),
           icon: UserIcon,
           onPress: () => {
             router.navigate("/(authenticated)/restricted_accounts");
@@ -167,7 +170,7 @@ const PrivacyScreen: React.FC = () => {
     >
       <View style={styles.itemIconContainer}>
         <IconComponent
-          color={theme.Colors.primary}
+          color={theme.Colors.typography}
           width={RFValue(20)}
           height={RFValue(20)}
         />
@@ -198,21 +201,28 @@ const PrivacyScreen: React.FC = () => {
   );
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      {sections.map((section, sectionIndex) => (
-        <View key={sectionIndex} style={styles.sectionContainer}>
-          <CustomText style={styles.sectionTitle}>{section.title}</CustomText>
-          {section.data.map((item, itemIndex) => (
-            <ListItem key={itemIndex} {...item} />
-          ))}
-        </View>
-      ))}
-    </ScrollView>
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: t("privacySettingsPage.headerTitle"),
+        }}
+      />
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {sections.map((section, sectionIndex) => (
+          <View key={sectionIndex} style={styles.sectionContainer}>
+            <CustomText style={styles.sectionTitle}>{section.title}</CustomText>
+            {section.data.map((item, itemIndex) => (
+              <ListItem key={itemIndex} {...item} />
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+    </>
   );
 };
 

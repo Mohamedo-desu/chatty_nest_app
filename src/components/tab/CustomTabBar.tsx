@@ -6,6 +6,7 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { router } from "expo-router";
 import React, { FC } from "react";
 import { TouchableOpacity, View } from "react-native";
+
 import {
   ChatBubbleLeftRightIcon,
   PlusIcon,

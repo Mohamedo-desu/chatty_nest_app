@@ -1,3 +1,4 @@
+import { getStoredValues } from "@/store/storage";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { ar } from "./languages/ar";
@@ -14,6 +15,19 @@ import { ru } from "./languages/ru";
 import { so } from "./languages/so";
 import { sw } from "./languages/sw";
 import { zh } from "./languages/zh";
+
+// Retrieve the stored language from your storage
+const stored = getStoredValues(["language"]);
+let defaultLanguage = "en";
+
+if (stored.language) {
+  try {
+    const parsed = JSON.parse(stored.language);
+    defaultLanguage = parsed.code || "en";
+  } catch (error) {
+    console.error("Error parsing stored language:", error);
+  }
+}
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -32,8 +46,8 @@ i18n.use(initReactI18next).init({
     zh,
     sw,
   },
-  lng: "en", // Default language
-  fallbackLng: "en", // Fallback language in case the current language isn't available
+  lng: defaultLanguage, // Set default language dynamically
+  fallbackLng: "en",
   interpolation: {
     escapeValue: false, // React already escapes by default
   },

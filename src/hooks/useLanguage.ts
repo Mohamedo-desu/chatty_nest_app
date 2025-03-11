@@ -1,3 +1,4 @@
+import { getStoredValues, saveSecurely } from "@/store/storage";
 import i18next from "i18next";
 import { useCallback, useMemo, useState } from "react";
 
@@ -22,7 +23,25 @@ export const useLanguage = () => {
     []
   );
 
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const getInitialLanguage = () => {
+    const { language } = getStoredValues(["language"]);
+    if (language) {
+      try {
+        const parsed = JSON.parse(language);
+        // Return the matching language if available
+        const found = languages.find((lang) => lang.code === parsed.code);
+        return found || languages[0];
+      } catch (error) {
+        console.error("Error parsing saved language:", error);
+      }
+    }
+    return languages[0];
+  };
+
+  // Get the initial language and inform i18next immediately.
+  const initialLanguage = getInitialLanguage();
+
+  const [selectedLanguage, setSelectedLanguage] = useState(initialLanguage);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
   const handleChangeLanguage = useCallback(
@@ -32,6 +51,7 @@ export const useLanguage = () => {
       });
       setSelectedLanguage(language);
       setLanguageModalVisible(false);
+      saveSecurely([{ key: "language", value: JSON.stringify(language) }]);
     },
     []
   );

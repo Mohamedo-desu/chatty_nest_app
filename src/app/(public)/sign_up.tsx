@@ -59,12 +59,12 @@ const SignUpScreen = () => {
       await signUp.prepareEmailAddressVerification({
         strategy: "email_code",
       });
+      setVerifying(true);
     } catch (error: any) {
       //console.error("Sign-up error:", error);
       showToast("error", "Error", error.message || "Sign-up failed");
     } finally {
       setLoading(false);
-      setVerifying(true);
     }
   };
 

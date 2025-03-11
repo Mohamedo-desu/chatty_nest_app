@@ -1,7 +1,9 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
+import { Stack } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
@@ -9,15 +11,16 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 const ThemeSettings = () => {
   const { styles, theme } = useStyles(stylesheet);
+  const { t } = useTranslation();
   const { theme: currTheme, setTheme } = useSettingsStore();
 
   const themeOptions = [
-    { title: "Light", value: "light" },
-    { title: "Dark", value: "dark" },
-    { title: "System", value: "system" },
+    { title: t("themeSettings.light"), value: "light" },
+    { title: t("themeSettings.dark"), value: "dark" },
+    { title: t("themeSettings.system"), value: "system" },
   ];
 
-  // Reusable list item component
+  // Reusable list item component.
   const ListItem = ({ title, value, selected, onPress }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
       <CustomText style={styles.itemTitle}>{title}</CustomText>
@@ -26,27 +29,30 @@ const ThemeSettings = () => {
   );
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={styles.contentContainer}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.sectionContainer}>
-        <CustomText style={styles.sectionTitle} variant="h6">
-          Choose your preferred theme
-        </CustomText>
-        {themeOptions.map((option, index) => (
-          <ListItem
-            key={index}
-            title={option.title}
-            value={option.value}
-            selected={currTheme === option.value}
-            onPress={() => setTheme(option.value)}
-          />
-        ))}
-      </View>
-    </ScrollView>
+    <>
+      <Stack.Screen options={{ headerTitle: t("themeSettings.headerTitle") }} />
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sectionContainer}>
+          <CustomText style={styles.sectionTitle} variant="h6">
+            {t("themeSettings.chooseTheme")}
+          </CustomText>
+          {themeOptions.map((option, index) => (
+            <ListItem
+              key={index}
+              title={option.title}
+              value={option.value}
+              selected={currTheme === option.value}
+              onPress={() => setTheme(option.value)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { DEVICE_WIDTH } from "@/utils/device";
 import { Tabs } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   ChatBubbleOvalLeftEllipsisIcon,
   Cog8ToothIcon,
@@ -13,6 +14,8 @@ import { useStyles } from "react-native-unistyles";
 
 const TabsLayout = () => {
   const { theme } = useStyles();
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -32,7 +35,7 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <HomeIcon color={color} size={size} />
           ),
-          tabBarLabel: "Home",
+          tabBarLabel: t("tabLayout.home"),
           tabBarBadge: 3,
         }}
       />
@@ -42,7 +45,7 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <Squares2X2Icon color={color} size={size} />
           ),
-          tabBarLabel: "Explore",
+          tabBarLabel: t("tabLayout.explore"),
         }}
       />
       <Tabs.Screen
@@ -51,18 +54,17 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <ChatBubbleOvalLeftEllipsisIcon color={color} size={size} />
           ),
-          tabBarLabel: "Chats",
+          tabBarLabel: t("tabLayout.chats"),
           tabBarBadge: 5,
         }}
       />
-
       <Tabs.Screen
         name="settings"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Cog8ToothIcon color={color} size={size} />
           ),
-          tabBarLabel: "Settings",
+          tabBarLabel: t("tabLayout.settings"),
         }}
       />
     </Tabs>
