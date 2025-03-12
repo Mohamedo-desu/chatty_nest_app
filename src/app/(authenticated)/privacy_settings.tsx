@@ -5,7 +5,7 @@ import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, TouchableOpacity, View } from "react-native";
@@ -201,28 +201,21 @@ const PrivacyScreen: React.FC = () => {
   );
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerTitle: t("privacySettingsPage.headerTitle"),
-        }}
-      />
-      <ScrollView
-        style={styles.page}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {sections.map((section, sectionIndex) => (
-          <View key={sectionIndex} style={styles.sectionContainer}>
-            <CustomText style={styles.sectionTitle}>{section.title}</CustomText>
-            {section.data.map((item, itemIndex) => (
-              <ListItem key={itemIndex} {...item} />
-            ))}
-          </View>
-        ))}
-      </ScrollView>
-    </>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {sections.map((section, sectionIndex) => (
+        <View key={sectionIndex} style={styles.sectionContainer}>
+          <CustomText style={styles.sectionTitle}>{section.title}</CustomText>
+          {section.data.map((item, itemIndex) => (
+            <ListItem key={itemIndex} {...item} />
+          ))}
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 

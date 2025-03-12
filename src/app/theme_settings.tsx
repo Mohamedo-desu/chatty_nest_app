@@ -1,7 +1,6 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
-import { Stack } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, TouchableOpacity, View } from "react-native";
@@ -29,30 +28,27 @@ const ThemeSettings = () => {
   );
 
   return (
-    <>
-      <Stack.Screen options={{ headerTitle: t("themeSettings.headerTitle") }} />
-      <ScrollView
-        style={styles.page}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.sectionContainer}>
-          <CustomText style={styles.sectionTitle} variant="h6">
-            {t("themeSettings.chooseTheme")}
-          </CustomText>
-          {themeOptions.map((option, index) => (
-            <ListItem
-              key={index}
-              title={option.title}
-              value={option.value}
-              selected={currTheme === option.value}
-              onPress={() => setTheme(option.value)}
-            />
-          ))}
-        </View>
-      </ScrollView>
-    </>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.sectionContainer}>
+        <CustomText style={styles.sectionTitle} variant="h6">
+          {t("themeSettings.chooseTheme")}
+        </CustomText>
+        {themeOptions.map((option, index) => (
+          <ListItem
+            key={index}
+            title={option.title}
+            value={option.value}
+            selected={currTheme === option.value}
+            onPress={() => setTheme(option.value)}
+          />
+        ))}
+      </View>
+    </ScrollView>
   );
 };
 

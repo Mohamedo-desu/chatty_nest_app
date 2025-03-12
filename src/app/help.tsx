@@ -2,7 +2,6 @@ import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
 import { useUserStore } from "@/store/userStore";
 import * as Sentry from "@sentry/react-native";
-import { Stack } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -99,93 +98,88 @@ const HelpScreen = () => {
   };
 
   return (
-    <>
-      <Stack.Screen options={{ headerTitle: t("helpScreen.headerTitle") }} />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        style={styles.screen}
-        contentContainerStyle={{ flexGrow: 1 }}
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      style={styles.screen}
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
+      <CustomText
+        variant="h5"
+        fontFamily={Fonts.Medium}
+        style={styles.subTitle}
+      >
+        {t("helpScreen.subTitle")}
+      </CustomText>
+
+      {/* Report Type Selection */}
+      <View style={styles.reportTypeContainer}>
+        {reportTypesMap.map((type) => (
+          <TouchableOpacity
+            key={type.key}
+            style={[styles.reportTypeButton(selectedType, type.key)]}
+            onPress={() => setSelectedType(type.key)}
+          >
+            <CustomText
+              style={{
+                color:
+                  selectedType === type.key ? "white" : theme.Colors.typography,
+              }}
+            >
+              {t(type.label)}
+            </CustomText>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* User Name Input */}
+      <TextInput
+        style={styles.textInputSmall}
+        placeholder={t("helpScreen.placeholderName")}
+        placeholderTextColor={theme.Colors.gray[500]}
+        value={userName}
+        onChangeText={setUserName}
+        autoCorrect={false}
+      />
+
+      {/* User Email Input */}
+      <TextInput
+        style={styles.textInputSmall}
+        placeholder={t("helpScreen.placeholderEmail")}
+        placeholderTextColor={theme.Colors.gray[500]}
+        value={userEmail}
+        onChangeText={setUserEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      {/* Report Description Input */}
+      <TextInput
+        style={styles.textInput}
+        placeholder={t("helpScreen.placeholderDescription")}
+        placeholderTextColor={theme.Colors.gray[500]}
+        value={reportText}
+        onChangeText={setReportText}
+        multiline
+        textAlignVertical="top"
+      />
+
+      {/* Submit Button */}
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        activeOpacity={0.8}
       >
         <CustomText
           variant="h5"
           fontFamily={Fonts.Medium}
-          style={styles.subTitle}
+          style={styles.submitButtonText}
         >
-          {t("helpScreen.subTitle")}
+          {t("helpScreen.submitReport")}
         </CustomText>
-
-        {/* Report Type Selection */}
-        <View style={styles.reportTypeContainer}>
-          {reportTypesMap.map((type) => (
-            <TouchableOpacity
-              key={type.key}
-              style={[styles.reportTypeButton(selectedType, type.key)]}
-              onPress={() => setSelectedType(type.key)}
-            >
-              <CustomText
-                style={{
-                  color:
-                    selectedType === type.key
-                      ? "white"
-                      : theme.Colors.typography,
-                }}
-              >
-                {t(type.label)}
-              </CustomText>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* User Name Input */}
-        <TextInput
-          style={styles.textInputSmall}
-          placeholder={t("helpScreen.placeholderName")}
-          placeholderTextColor={theme.Colors.gray[500]}
-          value={userName}
-          onChangeText={setUserName}
-          autoCorrect={false}
-        />
-
-        {/* User Email Input */}
-        <TextInput
-          style={styles.textInputSmall}
-          placeholder={t("helpScreen.placeholderEmail")}
-          placeholderTextColor={theme.Colors.gray[500]}
-          value={userEmail}
-          onChangeText={setUserEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        {/* Report Description Input */}
-        <TextInput
-          style={styles.textInput}
-          placeholder={t("helpScreen.placeholderDescription")}
-          placeholderTextColor={theme.Colors.gray[500]}
-          value={reportText}
-          onChangeText={setReportText}
-          multiline
-          textAlignVertical="top"
-        />
-
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleSubmit}
-          activeOpacity={0.8}
-        >
-          <CustomText
-            variant="h5"
-            fontFamily={Fonts.Medium}
-            style={styles.submitButtonText}
-          >
-            {t("helpScreen.submitReport")}
-          </CustomText>
-        </TouchableOpacity>
-      </ScrollView>
-    </>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 

@@ -65,7 +65,6 @@ export const en = {
       alertLogoutNo: "No",
     },
     privacySettingsPage: {
-      headerTitle: "Privacy Settings",
       accountPrivacy: "Account Privacy",
       privateAccount: "Private Account",
       activityStatus: "Activity Status",
@@ -87,7 +86,6 @@ export const en = {
       reset: "Reset code",
     },
     languageSettings: {
-      headerTitle: "Language Settings",
       title: "Choose your preferred language",
     },
     messageFilteringScreen: {
@@ -98,7 +96,6 @@ export const en = {
       saveSettings: "Save Settings",
     },
     notificationsScreen: {
-      headerTitle: "Notifications",
       generalNotifications: "General Notifications",
       pushNotifications: "Push Notifications",
       emailNotifications: "Email Notifications",
@@ -115,14 +112,12 @@ export const en = {
       vibrateOnNotification: "Vibrate on Notification",
     },
     themeSettings: {
-      headerTitle: "Theme Settings",
       chooseTheme: "Choose your preferred theme",
       light: "Light",
       dark: "Dark",
       system: "System",
     },
     aboutScreen: {
-      headerTitle: "About",
       appDescription: "Meet people",
       appInformation: "App Information",
       versionLabel: "Version:",
@@ -143,7 +138,6 @@ export const en = {
       openTermsError: "Unable to open Terms & Conditions.",
     },
     helpScreen: {
-      headerTitle: "Help & Feedback",
       subTitle:
         "Please let us know your feedback or any issues you are facing.",
       reportType: {
@@ -170,6 +164,42 @@ export const en = {
       explore: "Explore",
       chats: "Chats",
       settings: "Settings",
+    },
+    main: {
+      about: "About",
+      help_center: "Help Center",
+      help: "Help & Feedback",
+      language_settings: "Language Settings",
+      theme_settings: "Theme Settings",
+    },
+    public: {
+      forgot_password: "Forgot Password",
+      index: "index",
+      sign_in: "Sign In",
+      sign_up: "Sign Up",
+      reset_password: "Reset Password",
+    },
+    authenticated: {
+      edit_profile: "Edit Profile",
+      privacy_settings: "Privacy Settings",
+      message_filtering: "Message Filtering",
+      notifications_settings: "Notifications Settings",
+      add_post: "Add Post",
+      add_chat: "Add Chat",
+      blocked_accounts: "Blocked Accounts",
+      chat_details: "Chat Details",
+      data_usage: "Data Usage",
+      group_details: "Group Details",
+      profile: "Profile",
+      restricted_accounts: "Restricted Accounts",
+    },
+    chats: {
+      index: "Chats",
+      groups: "Groups",
+    },
+    home: {
+      index: "For You",
+      followings: "Followings",
     },
   },
 };

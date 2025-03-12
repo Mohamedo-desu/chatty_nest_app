@@ -14,6 +14,7 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, LogBox, Platform, View } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -100,6 +101,9 @@ const InitialLayout = () => {
   const segments = useSegments();
 
   const { styles } = useStyles(stylesheet);
+
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -140,31 +144,31 @@ const InitialLayout = () => {
           <Stack.Screen
             name="theme_settings"
             options={{
-              headerTitle: "Theme Settings",
+              headerTitle: t("main.theme_settings"),
             }}
           />
           <Stack.Screen
             name="help_center"
             options={{
-              headerTitle: "Help Center",
+              headerTitle: t("main.help_center"),
             }}
           />
           <Stack.Screen
             name="help"
             options={{
-              headerTitle: "Help & Reports",
+              headerTitle: t("main.help"),
             }}
           />
           <Stack.Screen
             name="language_settings"
             options={{
-              headerTitle: "Language Settings",
+              headerTitle: t("main.language_settings"),
             }}
           />
           <Stack.Screen
             name="about"
             options={{
-              headerTitle: "About",
+              headerTitle: t("main.about"),
             }}
           />
         </Stack>

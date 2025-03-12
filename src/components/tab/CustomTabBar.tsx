@@ -1,6 +1,5 @@
 import CustomText from "@/components/CustomText";
 import { Colors } from "@/constants/Colors";
-import { Fonts } from "@/constants/Fonts";
 import { DEVICE_WIDTH } from "@/utils/device";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { router } from "expo-router";
@@ -55,9 +54,12 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
             <Animated.View
               entering={ZoomIn.duration(500).delay(80)}
               exiting={ZoomOut}
+              style={styles.fabChatsWrapper}
             >
               <TouchableOpacity
                 onPress={() => router.navigate("/(authenticated)/add_chat")}
+                style={styles.fabChatsTouchable}
+                activeOpacity={0.8}
               >
                 <ChatBubbleLeftRightIcon
                   strokeWidth={1.2}
@@ -70,9 +72,11 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
             <Animated.View
               entering={ZoomIn.duration(500).delay(80)}
               exiting={ZoomOut.duration(500)}
+              style={styles.fabChatsWrapper}
             >
               <TouchableOpacity
                 onPress={() => router.navigate("/(authenticated)/add_post")}
+                style={styles.fabChatsTouchable}
               >
                 <PlusIcon color={Colors.white} size={RFValue(20)} />
               </TouchableOpacity>
@@ -116,37 +120,27 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
             };
 
             return (
-              <View
-                key={route.key}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <View key={route.key} style={styles.tabBarContainer}>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={onPress}
                   accessibilityRole="button"
                   accessibilityState={isFocused ? { selected: true } : {}}
                   style={styles.tabBarItemStyle}
-                  hitSlop={10}
                 >
-                  {icon}
-                  <CustomText
-                    style={{ color, fontSize: 12 }}
-                    variant="h7"
-                    fontFamily={Fonts.Regular}
-                  >
+                  <View>
+                    {icon}
+                    {options.tabBarBadge && (
+                      <View style={styles.tabBarBadgeStyle}>
+                        <CustomText style={styles.tabBarBadgeText}>
+                          {options.tabBarBadge}
+                        </CustomText>
+                      </View>
+                    )}
+                  </View>
+                  <CustomText style={styles.tabBarLabelText(color)}>
                     {typeof label === "string" ? label : ""}
                   </CustomText>
-                  {options.tabBarBadge && (
-                    <View style={styles.tabBarBadgeStyle}>
-                      <CustomText variant="h7" style={{ color: "#fff" }}>
-                        {options.tabBarBadge}
-                      </CustomText>
-                    </View>
-                  )}
                 </TouchableOpacity>
               </View>
             );
@@ -161,6 +155,16 @@ const CustomTabBar: FC<BottomTabBarProps> = ({
 export default CustomTabBar;
 
 const stylesheet = createStyleSheet((theme, rt) => ({
+  tabBarContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabBarBadgeText: { color: Colors.white, fontSize: RFValue(10) },
+  tabBarLabelText: (color) => ({
+    color,
+    fontSize: 12,
+  }),
   tabBarStyle: {
     height: 60,
     flexDirection: "row",
@@ -170,14 +174,17 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     elevation: 1,
   },
   tabBarItemStyle: {
+    width: "100%",
+    height: "100%",
     marginVertical: 0,
     alignItems: "center",
+    justifyContent: "center",
   },
   tabBarBadgeStyle: {
     backgroundColor: Colors.error,
     position: "absolute",
-    top: -3,
-    right: -3,
+    top: -5,
+    right: -5,
     width: 20,
     aspectRatio: 1,
     borderRadius: 20,
@@ -194,12 +201,25 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     backgroundColor: theme.Colors.primary,
     height: 50,
     aspectRatio: 1,
-    bottom: rt.insets.bottom + 45,
+    bottom: rt.insets.bottom + 40,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
     right: 20,
     position: "absolute",
     elevation: 1,
+    overflow: "hidden",
+  },
+  fabChatsWrapper: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fabChatsTouchable: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));

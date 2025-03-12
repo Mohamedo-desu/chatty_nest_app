@@ -5,7 +5,6 @@ import { Fonts } from "@/constants/Fonts";
 import { useSettingsStore } from "@/store/settingsStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
-import { Stack } from "expo-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, View } from "react-native";
@@ -179,35 +178,28 @@ const Notifications: React.FC = () => {
   );
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerTitle: t("notificationsScreen.headerTitle"),
-        }}
-      />
-      <ScrollView
-        style={styles.page}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {sections.map((section, sectionIndex) => (
-          <View key={sectionIndex} style={styles.sectionContainer}>
-            <CustomText style={styles.sectionTitle} variant="h6">
-              {section.title}
-            </CustomText>
-            {section.data.map((item, itemIndex) => (
-              <ListItem
-                key={itemIndex}
-                title={item.title}
-                value={item.value}
-                onValueChange={item.onValueChange}
-              />
-            ))}
-          </View>
-        ))}
-      </ScrollView>
-    </>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {sections.map((section, sectionIndex) => (
+        <View key={sectionIndex} style={styles.sectionContainer}>
+          <CustomText style={styles.sectionTitle} variant="h6">
+            {section.title}
+          </CustomText>
+          {section.data.map((item, itemIndex) => (
+            <ListItem
+              key={itemIndex}
+              title={item.title}
+              value={item.value}
+              onValueChange={item.onValueChange}
+            />
+          ))}
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 

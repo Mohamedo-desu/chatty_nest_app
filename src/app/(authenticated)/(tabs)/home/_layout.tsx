@@ -7,6 +7,7 @@ import {
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import { withLayoutContext } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 const { Navigator } = createMaterialTopTabNavigator();
@@ -19,7 +20,7 @@ export const MaterialTopTabs = withLayoutContext<
 >(Navigator);
 const _layout = () => {
   const { styles, theme } = useStyles(stylesheet);
-
+  const { t } = useTranslation();
   return (
     <MaterialTopTabs
       screenOptions={({ route }) => ({
@@ -35,10 +36,13 @@ const _layout = () => {
         tabBarLabelStyle: styles.tabBarLabelStyle,
       })}
     >
-      <MaterialTopTabs.Screen name="index" options={{ title: "For You" }} />
+      <MaterialTopTabs.Screen
+        name="index"
+        options={{ title: t("home.index") }}
+      />
       <MaterialTopTabs.Screen
         name="followings"
-        options={{ title: "Followings" }}
+        options={{ title: t("home.followings") }}
       />
     </MaterialTopTabs>
   );

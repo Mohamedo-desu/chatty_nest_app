@@ -3,7 +3,6 @@ import CustomText from "@/components/CustomText";
 import { appName } from "@/constants";
 import { Fonts } from "@/constants/Fonts";
 import * as Application from "expo-application";
-import { Stack } from "expo-router";
 import * as Updates from "expo-updates";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -99,88 +98,79 @@ const About: React.FC = () => {
   );
 
   return (
-    <>
-      <Stack.Screen options={{ headerTitle: t("aboutScreen.headerTitle") }} />
-      <ScrollView
-        style={styles.page}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <CustomText style={styles.header}>{appName}</CustomText>
-        <CustomText style={styles.description}>{appDescription}</CustomText>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <CustomText style={styles.header}>{appName}</CustomText>
+      <CustomText style={styles.description}>{appDescription}</CustomText>
 
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>
-            {t("aboutScreen.appInformation")}
+      <View style={styles.section}>
+        <CustomText style={styles.sectionTitle}>
+          {t("aboutScreen.appInformation")}
+        </CustomText>
+        <View style={styles.infoItem}>
+          <CustomText style={styles.infoLabel}>
+            {t("aboutScreen.versionLabel")}
           </CustomText>
-          <View style={styles.infoItem}>
-            <CustomText style={styles.infoLabel}>
-              {t("aboutScreen.versionLabel")}
-            </CustomText>
-            <CustomText style={styles.infoValue}>{version}</CustomText>
-          </View>
-          <View style={styles.infoItem}>
-            <CustomText style={styles.infoLabel}>
-              {t("aboutScreen.buildNumberLabel")}
-            </CustomText>
-            <CustomText style={styles.infoValue}>{buildNumber}</CustomText>
-          </View>
+          <CustomText style={styles.infoValue}>{version}</CustomText>
         </View>
-
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>
-            {t("aboutScreen.updates")}
+        <View style={styles.infoItem}>
+          <CustomText style={styles.infoLabel}>
+            {t("aboutScreen.buildNumberLabel")}
           </CustomText>
-          <CustomButton
-            text={t("aboutScreen.checkForUpdates")}
-            onPress={handleCheckForUpdates}
-            loading={loading}
+          <CustomText style={styles.infoValue}>{buildNumber}</CustomText>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <CustomText style={styles.sectionTitle}>
+          {t("aboutScreen.updates")}
+        </CustomText>
+        <CustomButton
+          text={t("aboutScreen.checkForUpdates")}
+          onPress={handleCheckForUpdates}
+          loading={loading}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <CustomText style={styles.sectionTitle}>
+          {t("aboutScreen.rateThisApp")}
+        </CustomText>
+        <CustomButton text={t("aboutScreen.rateNow")} onPress={handleRateApp} />
+      </View>
+
+      {/* Legal Section */}
+      <View style={styles.section}>
+        <CustomText style={styles.sectionTitle}>
+          {t("aboutScreen.legal")}
+        </CustomText>
+        <CustomText style={styles.legalText}>
+          {t("aboutScreen.legalText", {
+            year: new Date().getFullYear(),
+            appName: appName,
+          })}
+        </CustomText>
+        <View style={styles.legalLinks}>
+          <LegalLink
+            text={t("aboutScreen.privacyPolicy")}
+            onPress={() =>
+              handleOpenUrl(privacyPolicyUrl, t("aboutScreen.openPrivacyError"))
+            }
+          />
+          <CustomText style={styles.legalSeparator}>|</CustomText>
+          <LegalLink
+            text={t("aboutScreen.termsAndConditions")}
+            onPress={() =>
+              handleOpenUrl(termsUrl, t("aboutScreen.openTermsError"))
+            }
           />
         </View>
-
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>
-            {t("aboutScreen.rateThisApp")}
-          </CustomText>
-          <CustomButton
-            text={t("aboutScreen.rateNow")}
-            onPress={handleRateApp}
-          />
-        </View>
-
-        {/* Legal Section */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>
-            {t("aboutScreen.legal")}
-          </CustomText>
-          <CustomText style={styles.legalText}>
-            {t("aboutScreen.legalText", {
-              year: new Date().getFullYear(),
-              appName: appName,
-            })}
-          </CustomText>
-          <View style={styles.legalLinks}>
-            <LegalLink
-              text={t("aboutScreen.privacyPolicy")}
-              onPress={() =>
-                handleOpenUrl(
-                  privacyPolicyUrl,
-                  t("aboutScreen.openPrivacyError")
-                )
-              }
-            />
-            <CustomText style={styles.legalSeparator}>|</CustomText>
-            <LegalLink
-              text={t("aboutScreen.termsAndConditions")}
-              onPress={() =>
-                handleOpenUrl(termsUrl, t("aboutScreen.openTermsError"))
-              }
-            />
-          </View>
-        </View>
-      </ScrollView>
-    </>
+      </View>
+    </ScrollView>
   );
 };
 

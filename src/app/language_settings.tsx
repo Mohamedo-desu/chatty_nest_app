@@ -1,7 +1,6 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
 import { useLanguage } from "@/hooks/useLanguage"; // Adjust the path as needed
-import { Stack } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, TouchableOpacity, View } from "react-native";
@@ -49,35 +48,28 @@ const LanguageSettings: React.FC = () => {
   );
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerTitle: t("languageSettings.headerTitle"),
-        }}
-      />
-      <ScrollView
-        style={styles.page}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.sectionContainer}>
-          <CustomText style={styles.sectionTitle} variant="h6">
-            {t("languageSettings.title")}
-          </CustomText>
-          {languages.map((option, index) => (
-            <ListItem
-              key={index}
-              title={option.name}
-              code={option.code}
-              flag={option.flag}
-              selected={selectedLanguage.code === option.code}
-              onPress={() => handleChangeLanguage(option)}
-            />
-          ))}
-        </View>
-      </ScrollView>
-    </>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.sectionContainer}>
+        <CustomText style={styles.sectionTitle} variant="h6">
+          {t("languageSettings.title")}
+        </CustomText>
+        {languages.map((option, index) => (
+          <ListItem
+            key={index}
+            title={option.name}
+            code={option.code}
+            flag={option.flag}
+            selected={selectedLanguage.code === option.code}
+            onPress={() => handleChangeLanguage(option)}
+          />
+        ))}
+      </View>
+    </ScrollView>
   );
 };
 
