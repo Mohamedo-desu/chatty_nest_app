@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
   actions,
@@ -9,8 +10,19 @@ import {
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "./CustomText";
 
-const RichTextEditor = ({ editorRef, onChange }) => {
+// Define the props interface
+interface RichTextEditorProps {
+  editorRef: React.RefObject<RichEditor>;
+  onChange: (text: string) => void;
+}
+
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  editorRef,
+  onChange,
+}) => {
   const { styles } = useStyles(stylesheet);
+  const { t } = useTranslation();
+
   return (
     <View style={{ minHeight: 285 }}>
       <RichToolbar
@@ -31,19 +43,20 @@ const RichTextEditor = ({ editorRef, onChange }) => {
           actions.setParagraph,
         ]}
         iconMap={{
-          [actions.heading1]: ({ tintColor }) => (
+          [actions.heading1]: ({ tintColor }: { tintColor: string }) => (
             <CustomText style={{ color: tintColor }}>H1</CustomText>
           ),
-          [actions.heading4]: ({ tintColor }) => (
+          [actions.heading4]: ({ tintColor }: { tintColor: string }) => (
             <CustomText style={{ color: tintColor }}>H4</CustomText>
           ),
-          [actions.setParagraph]: ({ tintColor }) => (
+          [actions.setParagraph]: ({ tintColor }: { tintColor: string }) => (
             <CustomText style={{ color: tintColor }}>P</CustomText>
           ),
         }}
         style={styles.richBar}
         flatContainerStyle={styles.flatStyle}
-        editor={editorRef}
+        // Use getEditor prop to supply the editor reference
+        getEditor={() => editorRef.current}
         disabled={false}
         selectedIconTint={Colors.primary}
       />
@@ -51,7 +64,7 @@ const RichTextEditor = ({ editorRef, onChange }) => {
         ref={editorRef}
         containerStyle={styles.rich}
         editorStyle={styles.contentStyle}
-        placeholder={"Write something..."}
+        placeholder={t("addPost.RichEditorPlaceholder")}
         onChange={onChange}
       />
     </View>

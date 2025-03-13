@@ -14,15 +14,18 @@ export default {
         backgroundColor: Colors.lightGray[100],
         elevation: 5,
       }}
-      contentContainerStyle={{ paddingHorizontal: moderateScale(16) }}
+      contentContainerStyle={{
+        paddingHorizontal: moderateScale(16),
+        flexGrow: 1,
+      }}
       text1Style={{
         color: Colors.success,
-        fontSize: RFValue(14),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Bold,
       }}
       text2Style={{
         color: Colors.darkGray[400],
-        fontSize: RFValue(15),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Regular,
       }}
     />
@@ -38,12 +41,12 @@ export default {
       contentContainerStyle={{ paddingHorizontal: moderateScale(16) }}
       text1Style={{
         color: Colors.error,
-        fontSize: RFValue(14),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Bold,
       }}
       text2Style={{
         color: Colors.darkGray[400],
-        fontSize: RFValue(14),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Regular,
       }}
     />
@@ -59,12 +62,12 @@ export default {
       contentContainerStyle={{ paddingHorizontal: moderateScale(16) }}
       text1Style={{
         color: Colors.warning,
-        fontSize: RFValue(14),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Bold,
       }}
       text2Style={{
         color: Colors.darkGray[400],
-        fontSize: RFValue(15),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Regular,
       }}
     />
@@ -80,12 +83,12 @@ export default {
       contentContainerStyle={{ paddingHorizontal: moderateScale(16) }}
       text1Style={{
         color: Colors.primary,
-        fontSize: RFValue(14),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Bold,
       }}
       text2Style={{
         color: Colors.darkGray[400],
-        fontSize: RFValue(15),
+        fontSize: RFValue(13),
         fontFamily: Fonts.Regular,
       }}
     />

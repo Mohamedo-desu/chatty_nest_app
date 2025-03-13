@@ -23,7 +23,7 @@ import * as Yup from "yup";
 const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [verifying, setVerifying] = useState(false);
+  const [verifying, setVerifying] = useState(true);
   const [code, setCode] = useState("");
   const { t } = useTranslation();
   const { isLoaded, signUp, setActive } = useSignUp();

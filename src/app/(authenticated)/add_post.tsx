@@ -1,4 +1,3 @@
-import { Video } from "expo-av";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
@@ -21,11 +20,14 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
 import RichTextEditor from "@/components/RichTextEditor";
+import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { uploadMedia } from "@/services/uploadMedia";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { router } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { useTranslation } from "react-i18next";
 
 // Narrow the file type to the asset returned from ImagePicker
 type MediaFile = ImagePicker.ImagePickerAsset | null;
@@ -41,6 +43,8 @@ const AddNewPostScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { currentUser } = useUserStore();
 
+  const { t } = useTranslation();
+
   // For storing the post text
   const bodyRef = useRef<string>("");
   // Replace unknown with a proper ref type if available from RichTextEditor
@@ -49,6 +53,14 @@ const AddNewPostScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<MediaFile>(null);
   const [postType, setPostType] = useState<"public" | "private">("public");
+
+  const player =
+    file && file.uri.includes("videos")
+      ? useVideoPlayer(file.uri, (player) => {
+          player.loop = true;
+          player.play();
+        })
+      : null;
 
   const onPick = async (isImage: boolean): Promise<void> => {
     try {
@@ -63,11 +75,11 @@ const AddNewPostScreen: React.FC = () => {
       const result = await ImagePicker.launchImageLibraryAsync(mediaConfig);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        console.log("Picked file:", result.assets[0]);
         setFile(result.assets[0]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error picking media:", error);
+      showToast("error", "Error", error.message);
     }
   };
 
@@ -75,7 +87,10 @@ const AddNewPostScreen: React.FC = () => {
     setLoading(true);
     try {
       if (!bodyRef.current && !file) {
-        Alert.alert("Error", "Please enter some text or select a file.");
+        Alert.alert(
+          t("addPost.submitAlertError"),
+          t("addPost.submitAlertErrorDesc")
+        );
         return;
       }
 
@@ -111,15 +126,24 @@ const AddNewPostScreen: React.FC = () => {
       }
 
       if (data) {
-        console.log("Post created:", data);
         // Reset the post upon successful creation
         bodyRef.current = "";
         setFile(null);
         editorRef.current?.setContentHTML("");
+        showToast(
+          "success",
+          t("addPost.submitSuccessTitle"),
+          t("addPost.submitSuccessDesc")
+        );
         router.back();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting post:", error);
+      showToast(
+        "error",
+        t("addPost.submitErrorTitle"),
+        t("addPost.submitErrorDesc")
+      );
     } finally {
       setLoading(false);
     }
@@ -158,12 +182,11 @@ const AddNewPostScreen: React.FC = () => {
       {file && (
         <View style={styles.file}>
           {file.type === "video" ? (
-            <Video
-              source={{ uri: file.uri }}
-              style={{ flex: 1 }}
-              resizeMode="cover"
-              useNativeControls
-              isLooping
+            <VideoView
+              style={{ flex: 1, height: moderateScale(300) }}
+              player={player}
+              allowsFullscreen
+              allowsPictureInPicture
             />
           ) : (
             <Image
@@ -182,7 +205,9 @@ const AddNewPostScreen: React.FC = () => {
         </View>
       )}
       <View style={styles.mediaContainer}>
-        <CustomText style={styles.mediaText}>Add to your post</CustomText>
+        <CustomText style={styles.mediaText}>
+          {t("addPost.chooseMedia")}
+        </CustomText>
         <View style={styles.mediaIcons}>
           <TouchableOpacity onPress={() => onPick(true)}>
             <PhotoIcon size={RFValue(30)} color={theme.Colors.typography} />
@@ -197,7 +222,9 @@ const AddNewPostScreen: React.FC = () => {
       </View>
       {/* Post type selection */}
       <View style={styles.postTypeContainer}>
-        <CustomText style={styles.postTypeTitle}>Post Type:</CustomText>
+        <CustomText style={styles.postTypeTitle}>
+          {t("addPost.postType")}
+        </CustomText>
         <View style={styles.postTypeButtons}>
           <TouchableOpacity
             onPress={() => setPostType("public")}
@@ -212,7 +239,7 @@ const AddNewPostScreen: React.FC = () => {
                 postType === "public" && styles.selectedPostTypeText,
               ]}
             >
-              Public
+              {t("addPost.public")}
             </CustomText>
           </TouchableOpacity>
           <TouchableOpacity
@@ -228,13 +255,17 @@ const AddNewPostScreen: React.FC = () => {
                 postType === "private" && styles.selectedPostTypeText,
               ]}
             >
-              Private
+              {t("addPost.private")}
             </CustomText>
           </TouchableOpacity>
         </View>
       </View>
       <View style={styles.spacer} />
-      <CustomButton text="Post" loading={loading} onPress={onSubmit} />
+      <CustomButton
+        text={t("addPost.submit")}
+        loading={loading}
+        onPress={onSubmit}
+      />
     </ScrollView>
   );
 };

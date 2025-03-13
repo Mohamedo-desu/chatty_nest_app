@@ -1,5 +1,6 @@
 import CustomTabBar from "@/components/tab/CustomTabBar";
 import { Colors } from "@/constants/Colors";
+import { usePostStore } from "@/store/postStore";
 import { DEVICE_WIDTH } from "@/utils/device";
 import { Tabs } from "expo-router";
 import React from "react";
@@ -15,6 +16,8 @@ import { useStyles } from "react-native-unistyles";
 const TabsLayout = () => {
   const { theme } = useStyles();
   const { t } = useTranslation();
+  // Get the count of unseen posts from the store
+  const newPosts = usePostStore((state) => state.newPosts);
 
   return (
     <Tabs
@@ -36,7 +39,8 @@ const TabsLayout = () => {
             <HomeIcon color={color} size={size} />
           ),
           tabBarLabel: t("tabLayout.home"),
-          tabBarBadge: 3,
+          // Dynamically show the badge if there are unseen posts
+          tabBarBadge: newPosts > 0 ? newPosts : undefined,
         }}
       />
       <Tabs.Screen
@@ -55,6 +59,7 @@ const TabsLayout = () => {
             <ChatBubbleOvalLeftEllipsisIcon color={color} size={size} />
           ),
           tabBarLabel: t("tabLayout.chats"),
+          // Keeping the hard-coded badge for chats, if needed
           tabBarBadge: 5,
         }}
       />
