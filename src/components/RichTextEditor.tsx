@@ -9,8 +9,8 @@ import {
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "./CustomText";
 
-const RichTextEditor = ({ editorRef, bodyRef, loading, file, onChange }) => {
-  const { styles, theme } = useStyles(stylesheet);
+const RichTextEditor = ({ editorRef, onChange }) => {
+  const { styles } = useStyles(stylesheet);
   return (
     <View style={{ minHeight: 285 }}>
       <RichToolbar

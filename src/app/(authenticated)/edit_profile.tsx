@@ -3,12 +3,11 @@ import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
 import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
+import { uploadMedia } from "@/services/uploadMedia";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { decode } from "base64-arraybuffer";
-import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Formik, FormikHelpers } from "formik";
@@ -62,44 +61,9 @@ const EditProfile: React.FC = () => {
   );
 
   // Returns MIME type based on file extension
-  const getMimeType = (uri: string): string => {
-    const ext = uri.split(".").pop()?.toLowerCase();
-    switch (ext) {
-      case "jpg":
-      case "jpeg":
-        return "image/jpeg";
-      case "png":
-        return "image/png";
-      case "gif":
-        return "image/gif";
-      default:
-        return "image/jpeg";
-    }
-  };
 
   // Reusable function to upload an image to Supabase Storage.
   // It uploads the image to images/{userId}/{folder}/{fileName} and returns its public URL.
-  const uploadImage = async (
-    uri: string,
-    folder: string,
-    fileName: string
-  ): Promise<string> => {
-    // Read the file as a base64 string directly from the provided URI.
-    const base64Data = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    const fileData = decode(base64Data);
-    const mimeType = getMimeType(uri);
-    const storagePath = `${userId}/${folder}/${fileName}`;
-    const { error } = await client.storage
-      .from("images")
-      .upload(storagePath, fileData, { contentType: mimeType, upsert: true });
-    if (error) {
-      throw error;
-    }
-    const { data } = client.storage.from("images").getPublicUrl(storagePath);
-    return data.publicUrl;
-  };
 
   // Prompts the user to pick an image and updates the provided state setter
   const selectImage = async (
@@ -165,7 +129,7 @@ const EditProfile: React.FC = () => {
         // If the image URI starts with "file://", upload it;
         // otherwise, assume it's already hosted and use it as-is.
         profileImageUrl = profileImage.startsWith("file://")
-          ? await uploadImage(
+          ? await uploadMedia(
               profileImage,
               "avatars",
               `${profileImage.split("/").pop()}`
@@ -174,9 +138,9 @@ const EditProfile: React.FC = () => {
       }
       if (coverImage) {
         coverImageUrl = coverImage.startsWith("file://")
-          ? await uploadImage(
+          ? await uploadMedia(
               coverImage,
-              "cover",
+              "covers",
               `${coverImage.split("/").pop()}`
             )
           : coverImage;
