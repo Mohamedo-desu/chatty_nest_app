@@ -45,7 +45,7 @@ const ForYou = () => {
 
       const res = await fetchPosts(limit);
       if (res) {
-        if (posts.length === res.length) setHasMore(false);
+        if (posts.length === res.length || res.length === 0) setHasMore(false);
         setPosts(res);
       }
     } catch (error: any) {
@@ -137,7 +137,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   contentContainerStyle: {
     flexGrow: 1,
     gap: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 5,
     paddingVertical: rt.insets.top,
   },
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
