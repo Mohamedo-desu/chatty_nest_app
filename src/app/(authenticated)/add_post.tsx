@@ -1,6 +1,17 @@
+import CustomButton from "@/components/CustomButton";
+import CustomText from "@/components/CustomText";
+import RichTextEditor from "@/components/RichTextEditor";
+import { showToast } from "@/components/toast/ShowToast";
+import { Colors } from "@/constants/Colors";
+import { uploadMedia } from "@/services/mediaServices";
+import { useUserStore } from "@/store/userStore";
+import { client } from "@/supabase/config";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Pressable,
@@ -16,18 +27,6 @@ import {
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
-
-import CustomButton from "@/components/CustomButton";
-import CustomText from "@/components/CustomText";
-import RichTextEditor from "@/components/RichTextEditor";
-import { showToast } from "@/components/toast/ShowToast";
-import { Colors } from "@/constants/Colors";
-import { uploadMedia } from "@/services/uploadMedia";
-import { useUserStore } from "@/store/userStore";
-import { client } from "@/supabase/config";
-import { router } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
-import { useTranslation } from "react-i18next";
 
 // Narrow the file type to the asset returned from ImagePicker
 type MediaFile = ImagePicker.ImagePickerAsset | null;

@@ -113,6 +113,13 @@ const AuthenticatedLayout = () => {
         }}
       />
       <Stack.Screen
+        name="post_details"
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
         name="(tabs)"
         options={{
           headerShown: false,

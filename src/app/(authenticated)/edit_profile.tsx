@@ -3,7 +3,7 @@ import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
 import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
-import { uploadMedia } from "@/services/uploadMedia";
+import { uploadMedia } from "@/services/mediaServices";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";

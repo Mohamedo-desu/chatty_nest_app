@@ -6,7 +6,8 @@ export const fetchPosts = async (limit = 10) => {
     .select(
       `*,
         user:users (user_id,display_name,user_name,photo_url),
-        post_likes (*)
+        post_likes (*),
+        post_comments (count)
         `
     )
     .order("created_at", { ascending: false })
@@ -45,5 +46,82 @@ export const removePostLike = async (
 
   if (error) {
     throw error;
+  }
+};
+export const removePostComment = async (commentId: string | number) => {
+  const { error } = await client
+    .from("post_comments")
+    .delete()
+    .eq("id", commentId);
+
+  if (error) {
+    throw error;
+  }
+
+  return commentId;
+};
+export const getPostLikes = async (postId: string, userId: string) => {
+  try {
+    const { error, data } = await client
+      .from("post_likes")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("post_id", postId)
+      .single();
+    if (error) throw error;
+    if (data) return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getPostComments = async (postId: string, userId: string) => {
+  try {
+    const { error, data } = await client
+      .from("post_comments")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("post_id", postId)
+      .single();
+    if (error) throw error;
+    if (data) return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const fetchPostDetails = async (postId: string) => {
+  const { data, error } = await client
+    .from("posts")
+    .select(
+      `*,
+        user:users (user_id,display_name,user_name,photo_url),
+        post_likes (*),
+        post_comments (*, user:users (user_id,display_name,user_name,photo_url))
+        `
+    )
+    .eq("id", postId)
+    .order("created_at", { ascending: false, referencedTable: "post_comments" })
+    .single();
+
+  if (error) {
+    throw error;
+  }
+  if (data) {
+    return data;
+  }
+};
+
+export const createPostComment = async (postComment) => {
+  const { data, error } = await client
+    .from("post_comments")
+    .insert(postComment)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+  if (data) {
+    return data;
   }
 };

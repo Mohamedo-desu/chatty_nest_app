@@ -1,13 +1,22 @@
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
+import { downloadFile } from "@/services/mediaServices";
 import { createPostLike, removePostLike } from "@/services/postService";
+import { usePostStore } from "@/store/postStore"; // Import the store
 import { DEVICE_WIDTH } from "@/utils/device";
-import { shortenNumber } from "@/utils/functions";
+import { shortenNumber, stripHtmlTags } from "@/utils/functions";
 import { formatRelativeTime } from "@/utils/timeUtils";
 import { Image, ImageBackground } from "expo-image";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  Share,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   ChatBubbleBottomCenterTextIcon,
   EllipsisHorizontalIcon,
@@ -49,7 +58,8 @@ interface Post {
 interface PostCardProps {
   item: Post;
   currentUser: User;
-  router: any; // Replace with a more specific type if available
+  router: any;
+  isDetails: boolean; // Replace with a more specific type if available
 }
 
 const getTagsStyles = (theme: any) => ({
@@ -73,12 +83,21 @@ const getTagsStyles = (theme: any) => ({
   },
 });
 
-const PostCard: FC<PostCardProps> = ({ item, currentUser, router }) => {
+const PostCard: FC<PostCardProps> = ({
+  item,
+  currentUser,
+  router,
+  isDetails = false,
+}) => {
   const { styles, theme } = useStyles(stylesheet);
   const isVideo = item.file && item.file.includes("videos");
   const isImage = item.file && item.file.includes("images");
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
   const [likes, setLikes] = useState<PostLike[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Get the updatePost action from the store.
+  const { updatePost } = usePostStore();
 
   useEffect(() => {
     setLikes(item.post_likes);
@@ -95,17 +114,24 @@ const PostCard: FC<PostCardProps> = ({ item, currentUser, router }) => {
   const handleLike = async (): Promise<void> => {
     try {
       if (liked) {
+        // Remove like locally.
         const updatedLikes = likes.filter(
           (like) => like.user_id !== currentUser.user_id
         );
         setLikes(updatedLikes);
+        // Update the global store.
+        updatePost({ ...item, post_likes: updatedLikes });
         await removePostLike(item.id, currentUser.user_id);
       } else {
+        // Create a new like entry.
         const data: PostLike & { post_id: string | number } = {
           user_id: currentUser.user_id,
           post_id: item.id,
         };
-        setLikes([...likes, data]);
+        const updatedLikes = [...likes, data];
+        setLikes(updatedLikes);
+        // Update the global store.
+        updatePost({ ...item, post_likes: updatedLikes });
         await createPostLike(data);
       }
     } catch (error) {
@@ -113,8 +139,35 @@ const PostCard: FC<PostCardProps> = ({ item, currentUser, router }) => {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      setLoading(true);
+      let content = { message: stripHtmlTags(item.body) };
+      if (item.file) {
+        let url = await downloadFile(item.file);
+        content.url = url;
+        setLoading(false);
+      }
+      Share.share({
+        url: content.url,
+        message: content.message,
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  const handleOpenPostDetails = () => {
+    if (isDetails) return;
+    router.push({
+      pathname: "/post_details",
+      params: { postId: item.id },
+    });
+  };
+
   const liked = useMemo(
-    () => likes.find((like) => like.user_id === currentUser.user_id),
+    () => likes?.find((like) => like.user_id === currentUser.user_id),
     [likes, currentUser.user_id]
   );
 
@@ -146,12 +199,14 @@ const PostCard: FC<PostCardProps> = ({ item, currentUser, router }) => {
               </CustomText>
             </View>
           </View>
-          <TouchableOpacity>
-            <EllipsisHorizontalIcon
-              size={RFValue(20)}
-              color={theme.Colors.gray[500]}
-            />
-          </TouchableOpacity>
+          {!isDetails && (
+            <TouchableOpacity onPress={handleOpenPostDetails}>
+              <EllipsisHorizontalIcon
+                size={RFValue(20)}
+                color={theme.Colors.gray[500]}
+              />
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.content}>
           <View style={styles.postBody}>
@@ -189,23 +244,27 @@ const PostCard: FC<PostCardProps> = ({ item, currentUser, router }) => {
               />
             </TouchableOpacity>
             <CustomText style={styles.count}>
-              {shortenNumber(likes.length)}
+              {shortenNumber(likes?.length)}
             </CustomText>
           </View>
           <View style={styles.footerButton}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleOpenPostDetails}>
               <ChatBubbleBottomCenterTextIcon
                 size={RFValue(20)}
-                color={theme.Colors.typography}
+                color={theme.Colors.gray[500]}
               />
             </TouchableOpacity>
             <CustomText style={styles.count}>
-              {shortenNumber(item.comments?.length)}
+              {shortenNumber(item?.post_comments[0]?.count)}
             </CustomText>
           </View>
           <View style={styles.footerButton}>
-            <TouchableOpacity>
-              <ShareIcon size={RFValue(20)} color={theme.Colors.typography} />
+            <TouchableOpacity onPress={handleShare}>
+              {loading ? (
+                <ActivityIndicator size={"small"} color={Colors.primary} />
+              ) : (
+                <ShareIcon size={RFValue(20)} color={theme.Colors.gray[500]} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -272,7 +331,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     gap: 10,
   },
   content: {
-    // Ensure to add style for content if needed
+    // Additional content styles if needed
   },
   postBody: { marginBottom: 10 },
   postMedia: {

@@ -17,11 +17,9 @@ export interface PostState {
 
 interface PostActions {
   setPosts: (newPostsArray: Post[]) => void;
-
   getPost: (id: string | number) => Post | undefined;
-
+  updatePost: (updatedPost: Post) => void; // New action for updating a single post.
   updateInPostScreen: (inScreen: boolean) => void;
-
   recalcNewPosts: () => void;
 }
 
@@ -57,6 +55,22 @@ export const usePostStore = create<PostState & PostActions>()(
       },
       getPost: (id: string | number) => {
         return get().posts.find((post) => post.id === id);
+      },
+      updatePost: (updatedPost: Post) => {
+        const posts = get().posts;
+        const exists = posts.some((post) => post.id === updatedPost.id);
+        if (exists) {
+          // Update the matching post (and mark it as seen)
+          const updatedPosts = posts.map((post) =>
+            post.id === updatedPost.id
+              ? { ...post, ...updatedPost, hasSeen: true }
+              : post
+          );
+          set({ posts: updatedPosts });
+        } else {
+          // Add new post if it doesn't exist yet
+          set({ posts: [...posts, { ...updatedPost, hasSeen: true }] });
+        }
       },
       updateInPostScreen: (inScreen: boolean) => {
         if (inScreen) {

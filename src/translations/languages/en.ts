@@ -215,5 +215,11 @@ export const en = {
       submitErrorDesc: "An error occurred while uploading your post.",
       RichEditorPlaceholder: "Write something here...",
     },
+    commentCard: {
+      alertDeleteTitle: "Confirm",
+      alertDeleteDescription: "Are you sure you want to delete this comment?",
+      alertDeleteYes: "Yes",
+      alertDeleteNo: "No",
+    },
   },
 };

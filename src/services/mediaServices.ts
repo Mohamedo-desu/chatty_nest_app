@@ -48,3 +48,17 @@ export const uploadMedia = async (
   const { data } = client.storage.from("uploads").getPublicUrl(storagePath);
   return data.publicUrl;
 };
+
+export const downloadFile = async (url: string) => {
+  try {
+    let fileName = url.split("/").pop();
+
+    const localFilePath = `${FileSystem.documentDirectory}${fileName}`;
+
+    const { uri } = await FileSystem.downloadAsync(url, localFilePath);
+
+    return uri;
+  } catch (error) {
+    return null;
+  }
+};

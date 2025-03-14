@@ -2,7 +2,12 @@ import CustomText from "@/components/CustomText";
 import { showToast } from "@/components/toast/ShowToast";
 import PostCard from "@/components/ui/PostCard";
 import { Colors } from "@/constants/Colors";
-import { fetchPosts } from "@/services/postService";
+import { Fonts } from "@/constants/Fonts";
+import {
+  fetchPosts,
+  getPostComments,
+  getPostLikes,
+} from "@/services/postService";
 import { getUserData } from "@/services/userService";
 import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
@@ -17,7 +22,7 @@ import {
   RefreshControl,
   View,
 } from "react-native";
-import { moderateScale } from "react-native-size-matters";
+import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 var limit = 0;
@@ -57,8 +62,15 @@ const ForYou = () => {
   const handlePostEvent = async (payload: any) => {
     if (payload.eventType === "INSERT" && payload.new.id) {
       let newPost = { ...payload.new };
-      const res = await getUserData(newPost.user_id, false);
-      newPost.user = res ?? {};
+      const userData = await getUserData(newPost.user_id, false);
+      const likesData = await getPostLikes(newPost.id, currentUser.user_id);
+      const commentsData = await getPostComments(
+        newPost.id,
+        currentUser.user_id
+      );
+      newPost.user = userData ?? {};
+      newPost.post_likes = likesData ?? [];
+      newPost.post_comments = commentsData ?? [];
       setPosts([newPost, ...usePostStore.getState().posts]);
     }
   };
@@ -108,16 +120,14 @@ const ForYou = () => {
         hasMore ? (
           <View
             style={{
-              marginVertical: posts.length === 0 ? DEVICE_HEIGHT / 2 : 30,
+              marginVertical: posts.length === 0 ? DEVICE_HEIGHT / 3 : 30,
             }}
           >
             <ActivityIndicator size="small" color={Colors.primary} />
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <CustomText variant="h7" style={styles.emptyText}>
-              No posts!
-            </CustomText>
+            <CustomText style={styles.emptyText}>No posts!</CustomText>
           </View>
         )
       }
@@ -142,8 +152,9 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   },
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Medium",
+    fontSize: RFValue(14),
+    fontFamily: Fonts.Medium,
     color: theme.Colors.gray[200],
+    textAlign: "center",
   },
 }));

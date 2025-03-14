@@ -42,3 +42,7 @@ export const debounce = (func: () => Promise<void>, delay: number) => {
     }, delay);
   };
 };
+
+export const stripHtmlTags = (html) => {
+  return html.replace(/<[^>]*>?/gm, "");
+};

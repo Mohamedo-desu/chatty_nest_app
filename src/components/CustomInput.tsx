@@ -1,36 +1,31 @@
 import { Colors } from "@/constants/Colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { FC } from "react";
 import {
   NativeSyntheticEvent,
+  StyleProp,
   TextInput,
   TextInputFocusEventData,
   TextInputProps,
   TouchableOpacity,
   View,
-  ViewStyle,
 } from "react-native";
-
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
-import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "./CustomText";
 
-interface CustomInputProps {
+import { TextStyle } from "react-native";
+
+interface CustomInputProps extends TextInputProps {
   placeholder: string;
-  rightIcon?: string | null;
+  rightIcon?: string;
   errors?: string;
   touched?: boolean;
   value: string;
   onPressRightIcon?: () => void;
   handleChange: (value: string) => void;
   handleBlur?: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void;
-  autoComplete?: TextInputProps["autoComplete"];
-  maxLength?: number;
-  keyboardType?: TextInputProps["keyboardType"];
-  secureTextEntry?: boolean;
-  style?: ViewStyle | ViewStyle[];
-  props?: TextInputProps;
+  style?: StyleProp<TextStyle>;
 }
 
 const CustomInput: FC<CustomInputProps> = ({
@@ -41,13 +36,13 @@ const CustomInput: FC<CustomInputProps> = ({
   value,
   handleChange,
   handleBlur,
-  autoComplete,
-  maxLength,
-  keyboardType,
-  secureTextEntry,
   onPressRightIcon,
   style,
-  props,
+  autoComplete,
+  maxLength,
+  keyboardType = "default",
+  secureTextEntry = false,
+  ...rest
 }) => {
   const { styles, theme } = useStyles(stylesheet);
 
@@ -58,7 +53,7 @@ const CustomInput: FC<CustomInputProps> = ({
           value={value}
           onChangeText={handleChange}
           onBlur={handleBlur}
-          keyboardType={keyboardType || "default"}
+          keyboardType={keyboardType}
           autoCapitalize="none"
           cursorColor={Colors.primary}
           autoComplete={autoComplete}
@@ -67,8 +62,9 @@ const CustomInput: FC<CustomInputProps> = ({
           placeholder={placeholder}
           style={[styles.input, style]}
           placeholderTextColor={theme.Colors.gray[400]}
-          secureTextEntry={secureTextEntry || false}
-          {...props}
+          secureTextEntry={secureTextEntry}
+          ref={rest.inputRef}
+          {...rest}
         />
         {rightIcon && (
           <TouchableOpacity
@@ -83,11 +79,11 @@ const CustomInput: FC<CustomInputProps> = ({
           </TouchableOpacity>
         )}
       </View>
-      {errors && touched ? (
+      {errors && touched && (
         <CustomText variant="h7" style={styles.error}>
           {errors}
         </CustomText>
-      ) : null}
+      )}
     </>
   );
 };
@@ -103,12 +99,12 @@ const stylesheet = createStyleSheet((theme) => ({
     borderWidth: 1,
     borderColor: theme.Colors.gray[200],
     paddingHorizontal: theme.margins.md,
-    height: moderateScale(50),
+    paddingVertical: 15,
   },
   input: {
     flex: 1,
     fontFamily: theme.fonts.Regular,
-    fontSize: RFValue(14),
+    fontSize: RFValue(12),
     color: theme.Colors.typography,
   },
   rightIconContainer: {
