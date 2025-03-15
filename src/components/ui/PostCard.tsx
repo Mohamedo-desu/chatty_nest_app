@@ -137,11 +137,19 @@ const PostCard: FC<PostCardProps> = ({
           user_id: currentUser.user_id,
           post_id: item.id,
         };
+        const notificationData = {
+          pushTokens: item.user.push_tokens,
+          likerName: currentUser.display_name,
+          postTitle: stripHtmlTags(item.body),
+          recipientId: item.user.user_id,
+          postId: item.id,
+        };
+
         const updatedLikes = [...likes, data];
         setLikes(updatedLikes);
         // Update the global store.
         updatePost({ ...item, post_likes: updatedLikes });
-        await createPostLike(data);
+        await createPostLike(data, notificationData);
       }
     } catch (error) {
       console.error(error);

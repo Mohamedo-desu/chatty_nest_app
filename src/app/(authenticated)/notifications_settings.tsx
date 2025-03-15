@@ -86,26 +86,6 @@ const Notifications: React.FC = () => {
   // Define sections with translation keys.
   const sections: { title: string; data: ListItemData[] }[] = [
     {
-      title: t("notificationsScreen.generalNotifications"),
-      data: [
-        {
-          title: t("notificationsScreen.pushNotifications"),
-          value: notificationSettings.push_notifications,
-          onValueChange: handleToggle("push_notifications"),
-        },
-        {
-          title: t("notificationsScreen.emailNotifications"),
-          value: notificationSettings.email_notifications,
-          onValueChange: handleToggle("email_notifications"),
-        },
-        {
-          title: t("notificationsScreen.smsNotifications"),
-          value: notificationSettings.sms_notifications,
-          onValueChange: handleToggle("sms_notifications"),
-        },
-      ],
-    },
-    {
       title: t("notificationsScreen.socialActivity"),
       data: [
         {

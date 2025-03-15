@@ -15,6 +15,7 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "./CustomText";
 
 import { TextStyle } from "react-native";
+import { moderateScale } from "react-native-size-matters";
 
 interface CustomInputProps extends TextInputProps {
   placeholder: string;
@@ -99,12 +100,12 @@ const stylesheet = createStyleSheet((theme) => ({
     borderWidth: 1,
     borderColor: theme.Colors.gray[200],
     paddingHorizontal: theme.margins.md,
-    paddingVertical: 15,
+    height: moderateScale(45),
   },
   input: {
     flex: 1,
     fontFamily: theme.fonts.Regular,
-    fontSize: RFValue(12),
+    fontSize: RFValue(14),
     color: theme.Colors.typography,
   },
   rightIconContainer: {

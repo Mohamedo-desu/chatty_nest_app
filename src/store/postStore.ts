@@ -89,7 +89,7 @@ export const usePostStore = create<PostState & PostActions>()(
       },
     }),
     {
-      name: "Post-storage",
+      name: "post-storage",
       storage: createJSONStorage(() => mmkvStorage),
     }
   )

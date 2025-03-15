@@ -1,5 +1,6 @@
 import CustomText from "@/components/CustomText";
 import { Fonts } from "@/constants/Fonts";
+import { useUserStore } from "@/store/userStore";
 import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
@@ -24,6 +25,7 @@ import { createStyleSheet, useStyles } from "react-native-unistyles";
 const SettingsScreen = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { signOut } = useAuth();
+  const { logOut } = useUserStore();
 
   const { t } = useTranslation();
 
@@ -145,7 +147,7 @@ const SettingsScreen = () => {
               [
                 {
                   text: t("SettingsPage.alertLogoutYes"),
-                  onPress: () => signOut(),
+                  onPress: () => logOut(signOut),
                 },
                 {
                   text: t("SettingsPage.alertLogoutNo"),

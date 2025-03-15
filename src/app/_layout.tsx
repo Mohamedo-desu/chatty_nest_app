@@ -4,6 +4,7 @@ import { tokenCache } from "@/utils/cache";
 import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import * as Sentry from "@sentry/react-native";
 import CustomThemeProvider from "CustomThemeProvider";
+import * as Notifications from "expo-notifications";
 import * as QuickActions from "expo-quick-actions";
 import {
   Stack,
@@ -75,6 +76,14 @@ Sentry.init({
   attachScreenshot: true,
   attachStacktrace: true,
   enableAutoPerformanceTracing: true,
+});
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
 });
 
 const scope = Sentry.getGlobalScope();

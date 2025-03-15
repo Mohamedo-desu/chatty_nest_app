@@ -1,3 +1,5 @@
+import { useNotificationObserver } from "@/hooks/useNotificationObserver";
+import useSetupForPushNotifications from "@/hooks/useSetupForPushNotifications";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { useUser } from "@clerk/clerk-expo";
@@ -37,6 +39,8 @@ const AuthenticatedLayout = () => {
     fetchUserData();
   }, [user]);
 
+  useSetupForPushNotifications(user.id);
+  useNotificationObserver();
   return (
     <Stack screenOptions={{ headerShown: true }}>
       <Stack.Screen

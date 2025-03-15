@@ -16,6 +16,7 @@ import { getUserData } from "@/services/userService";
 import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
+import { stripHtmlTags } from "@/utils/functions";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, TextInput, View } from "react-native";
@@ -91,20 +92,28 @@ const PostDetails: React.FC = () => {
     };
     setLoading(true);
     try {
-      const res = await createPostComment(data);
-      if (res) {
-        inputRef.current?.clear();
-        commentRef.current = "";
-        showToast("success", "Success", "Comment added successfully!");
-        // Optionally, re-fetch the post details here.
-      }
+      // Note: Use "commenterName" instead of "likerName" for comment notifications.
+      const notificationData = {
+        pushTokens: post?.user.push_tokens,
+        commenterName: currentUser.display_name,
+        postTitle: stripHtmlTags(post?.body),
+        recipientId: post?.user.user_id,
+        postId: post?.id,
+      };
+
+      await createPostComment(data, notificationData);
+
+      inputRef.current?.clear();
+      commentRef.current = "";
+      showToast("success", "Success", "Comment added successfully!");
+      // Optionally, re-fetch the post details here.
     } catch (error: any) {
       console.error(error);
       showToast("error", "Error", error.message);
     } finally {
       setLoading(false);
     }
-  }, [currentUser.user_id, postId]);
+  }, [currentUser.user_id, postId, post, currentUser.display_name]);
 
   const onDelete = useCallback(
     async (comment: Comment): Promise<void> => {

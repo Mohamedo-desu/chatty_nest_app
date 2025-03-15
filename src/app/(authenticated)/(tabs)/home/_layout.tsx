@@ -34,6 +34,7 @@ const _layout = () => {
         style: styles.tabBarStyle,
         tabBarStyle: styles.container,
         tabBarLabelStyle: styles.tabBarLabelStyle,
+        swipeEnabled: false,
       })}
     >
       <MaterialTopTabs.Screen

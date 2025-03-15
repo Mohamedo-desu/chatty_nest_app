@@ -16,14 +16,13 @@ import { Modal, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
-
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import * as Yup from "yup";
 
 const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [verifying, setVerifying] = useState(true);
+  const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const { t } = useTranslation();
   const { isLoaded, signUp, setActive } = useSignUp();

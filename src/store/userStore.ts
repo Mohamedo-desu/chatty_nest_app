@@ -27,7 +27,7 @@ export const useUserStore = create<UserState>()(
         if (pushTokenString) {
           const { error } = await client.rpc("remove_push_token", {
             push_token: pushTokenString,
-            user_id: userId,
+            p_user_id: userId,
           });
           if (error) {
             console.error("Error deleting push token in Supabase:", error);
@@ -35,14 +35,19 @@ export const useUserStore = create<UserState>()(
         }
 
         // Clear persisted data
-        deleteStoredValues(["pushTokenString", "User-storage"]);
+        deleteStoredValues([
+          "pushTokenString",
+          "user-storage",
+          "settings-storage",
+          "post-storage",
+        ]);
 
-        set({ currentUser: defaultUser });
         signOut();
+        set({ currentUser: defaultUser });
       },
     }),
     {
-      name: "User-storage",
+      name: "user-storage",
       storage: createJSONStorage(() => mmkvStorage),
     }
   )

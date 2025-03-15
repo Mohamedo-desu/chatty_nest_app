@@ -46,6 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       package: packageName,
       softwareKeyboardLayoutMode: "pan",
+      googleServicesFile: "./google-services.json",
     },
     updates: {
       url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
@@ -109,6 +110,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           supportsBackgroundPlayback: true,
           supportsPictureInPicture: true,
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "",
+          color: "#ab21c7",
+          defaultChannel: "default",
+          sounds: [],
+          enableBackgroundRemoteNotifications: true,
         },
       ],
     ],
