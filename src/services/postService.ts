@@ -149,12 +149,33 @@ export const fetchUserPosts = async (limit = 10, userId: string) => {
     return data;
   }
 };
-export const removePost = async (postId: string | number) => {
-  const { error } = await client.from("posts").delete().eq("id", postId);
+export const removePost = async (postId: string | number, file: string) => {
+  if (file) {
+    deleteStorageFile(file);
+  }
 
-  if (error) {
-    throw error;
+  const { error: deleteError } = await client
+    .from("posts")
+    .delete()
+    .eq("id", postId);
+
+  if (deleteError) {
+    throw deleteError;
   }
 
   return postId;
+};
+
+export const deleteStorageFile = async (fileUrl: string): Promise<void> => {
+  let removePath = fileUrl;
+  if (fileUrl.startsWith("http")) {
+    const parts = fileUrl.split("/storage/v1/object/public/uploads/");
+    if (parts.length === 2) {
+      removePath = parts[1];
+    }
+  }
+  const { error } = await client.storage.from("uploads").remove([removePath]);
+  if (error) {
+    console.error("Error deleting storage file:", error);
+  }
 };

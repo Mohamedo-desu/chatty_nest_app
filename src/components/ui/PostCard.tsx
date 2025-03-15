@@ -219,9 +219,6 @@ const PostCard: FC<PostCardProps> = ({
               <CustomText style={styles.displayName}>
                 {item.user.display_name}
               </CustomText>
-              <CustomText style={styles.userName}>
-                @{item.user.user_name}
-              </CustomText>
               <CustomText style={styles.postTime}>
                 {formatRelativeTime(item.created_at)}
               </CustomText>
@@ -230,7 +227,7 @@ const PostCard: FC<PostCardProps> = ({
           {!isDetails && (
             <TouchableOpacity onPress={handleOpenPostDetails}>
               <EllipsisHorizontalIcon
-                size={RFValue(20)}
+                size={RFValue(22)}
                 color={theme.Colors.gray[500]}
               />
             </TouchableOpacity>
@@ -239,12 +236,12 @@ const PostCard: FC<PostCardProps> = ({
             <View style={styles.actions}>
               <TouchableOpacity onPress={onEdit}>
                 <PencilSquareIcon
-                  size={RFValue(15)}
+                  size={RFValue(22)}
                   color={theme.Colors.secondary}
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={handleDeleteComment}>
-                <TrashIcon size={RFValue(15)} color={Colors.error} />
+                <TrashIcon size={RFValue(22)} color={Colors.error} />
               </TouchableOpacity>
             </View>
           )}
@@ -256,6 +253,10 @@ const PostCard: FC<PostCardProps> = ({
                 contentWidth={DEVICE_WIDTH}
                 source={{ html: item.body }}
                 tagsStyles={getTagsStyles(theme)}
+                defaultTextProps={{
+                  numberOfLines: !isDetails ? 3 : undefined,
+                  ellipsizeMode: "tail",
+                }}
               />
             )}
           </View>
@@ -280,7 +281,7 @@ const PostCard: FC<PostCardProps> = ({
           <View style={styles.footerButton}>
             <TouchableOpacity onPress={handleLike}>
               <HeartIcon
-                size={RFValue(20)}
+                size={RFValue(22)}
                 color={liked ? theme.Colors.primary : theme.Colors.gray[500]}
               />
             </TouchableOpacity>
@@ -294,7 +295,7 @@ const PostCard: FC<PostCardProps> = ({
           <View style={styles.footerButton}>
             <TouchableOpacity onPress={handleOpenPostDetails}>
               <ChatBubbleBottomCenterTextIcon
-                size={RFValue(20)}
+                size={RFValue(22)}
                 color={theme.Colors.gray[500]}
               />
             </TouchableOpacity>
@@ -310,7 +311,7 @@ const PostCard: FC<PostCardProps> = ({
               {loading ? (
                 <ActivityIndicator size={"small"} color={Colors.primary} />
               ) : (
-                <ShareIcon size={RFValue(20)} color={theme.Colors.gray[500]} />
+                <ShareIcon size={RFValue(22)} color={theme.Colors.gray[500]} />
               )}
             </TouchableOpacity>
           </View>
@@ -338,7 +339,7 @@ const PostCard: FC<PostCardProps> = ({
                 hitSlop={10}
                 onPress={() => setPhotoModalVisible(false)}
               >
-                <XMarkIcon size={RFValue(20)} color={Colors.error} />
+                <XMarkIcon size={RFValue(22)} color={Colors.error} />
               </Pressable>
             </View>
           </ImageBackground>
@@ -421,7 +422,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     gap: 10,
   },
   count: {
-    fontSize: RFValue(12),
+    fontSize: RFValue(14),
     color: theme.Colors.typography,
   },
   modalBackground: {
@@ -448,7 +449,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     marginTop: rt.insets.top,
   },
   modalNameText: {
-    fontSize: RFValue(20),
+    fontSize: RFValue(22),
     fontFamily: Fonts.Medium,
     textTransform: "capitalize",
     color: Colors.white,

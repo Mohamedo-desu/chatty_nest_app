@@ -28,7 +28,8 @@ LogBox.ignoreLogs([
   "Clerk: Clerk has been loaded with development keys",
   "Warning: TNodeChildrenRenderer:",
   "Warning: MemoizedTNodeRenderer:",
-  "Warning: TRenderEngineProvider: ",
+  "Warning: TRenderEngineProvider:",
+  "Warning: bound renderChildren:",
 ]);
 
 const manifest = Updates.manifest;

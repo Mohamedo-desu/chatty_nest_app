@@ -92,11 +92,6 @@ const ForYou = () => {
       style={styles.page}
       data={posts}
       contentContainerStyle={styles.contentContainerStyle}
-      refreshing={refreshing}
-      onRefresh={() => {
-        setRefreshing(true);
-        getForYouPosts().finally(() => setRefreshing(false));
-      }}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

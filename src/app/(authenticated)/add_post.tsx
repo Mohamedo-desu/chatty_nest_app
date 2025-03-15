@@ -4,7 +4,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { uploadMedia } from "@/services/mediaServices";
-import { fetchPostDetails } from "@/services/postService";
+import { deleteStorageFile, fetchPostDetails } from "@/services/postService";
 import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
@@ -54,11 +54,13 @@ interface PostBodyData {
   type: "public" | "private";
 }
 
+// Helper function to delete a file from Supabase storage.
+// It extracts the relative file path from a full URL and calls remove on the "uploads" bucket.
+
 const AddNewPostScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { currentUser } = useUserStore();
   const { updatePost } = usePostStore();
-  const [posts, setPosts] = useState<Post[]>([]);
   const [post, setPost] = useState<Post | null>(null);
 
   const { postId } = useLocalSearchParams<{ postId?: string }>();
@@ -72,7 +74,7 @@ const AddNewPostScreen: React.FC = () => {
   const [file, setFile] = useState<MediaFile>(null);
   const [postType, setPostType] = useState<"public" | "private">("public");
 
-  // Always compute a videoUri (empty string if not applicable) to ensure hook order is maintained.
+  // Always compute a videoUri (empty string if not applicable) to maintain hook order.
   const videoUri: string = file && file.type === "video" ? file.uri : "";
   const player = useVideoPlayer(videoUri, (playerInstance) => {
     if (videoUri) {
@@ -105,7 +107,7 @@ const AddNewPostScreen: React.FC = () => {
   const onSubmit = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      // Validate at least one of the fields is provided
+      // Validate that at least one field is provided.
       if (!bodyRef.current.trim() && !file) {
         Alert.alert(
           t("addPost.submitAlertError"),
@@ -127,6 +129,11 @@ const AddNewPostScreen: React.FC = () => {
         } else {
           postMediaUrl = file.uri;
         }
+      }
+
+      // In update mode, if the file was changed (or removed), delete the previous file.
+      if (post && post.file && post.file !== postMediaUrl) {
+        await deleteStorageFile(post.file);
       }
 
       const bodyData: PostBodyData = {
@@ -151,7 +158,7 @@ const AddNewPostScreen: React.FC = () => {
       }
 
       if (data) {
-        // Reset fields upon success
+        // Reset fields upon success.
         bodyRef.current = "";
         setFile(null);
         editorRef.current?.setContentHTML("");
@@ -164,15 +171,14 @@ const AddNewPostScreen: React.FC = () => {
         );
 
         if (post?.id) {
-          // Update the post in store if it's an update
-
+          // Update the post in store if it's an update.
           const updatedPost: Post = {
             ...post,
             body: bodyData.body,
             file: bodyData.file,
             type: bodyData.type,
             post_likes: Array.isArray(post.post_likes) ? post.post_likes : [],
-            post_comments: [{ count: post.post_comments?.length }],
+            post_comments: [{ count: post.post_comments?.length ?? 0 }],
           };
           updatePost(updatedPost);
         }
@@ -190,7 +196,7 @@ const AddNewPostScreen: React.FC = () => {
     }
   }, [currentUser.user_id, file, post, postType, t, updatePost]);
 
-  // Fetch post details if editing an existing post
+  // Fetch post details if editing an existing post.
   const getPostDetails = useCallback(async (): Promise<void> => {
     try {
       const res = await fetchPostDetails(postId as string);
@@ -202,7 +208,7 @@ const AddNewPostScreen: React.FC = () => {
     }
   }, [postId]);
 
-  // Update fields when a post is loaded (for editing)
+  // Update fields when a post is loaded (for editing).
   useEffect(() => {
     if (post && post.id) {
       const fileUri = post.file;
@@ -215,7 +221,7 @@ const AddNewPostScreen: React.FC = () => {
       bodyRef.current = post.body;
       setPostType(post.type);
 
-      // Delay setting content to allow the editor to mount
+      // Delay setting content to allow the editor to mount.
       const timeoutId = setTimeout(() => {
         editorRef.current?.setContentHTML(post.body);
       }, 1000);

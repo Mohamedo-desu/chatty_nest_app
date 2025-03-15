@@ -34,6 +34,7 @@ interface Post {
   id: string;
   user_id: string;
   post_comments: Comment[];
+  file?: string;
   // Add any additional fields as needed
 }
 
@@ -58,22 +59,28 @@ const PostDetails: React.FC = () => {
   const { updatePost, setPosts, posts } = usePostStore();
   const { currentUser } = useUserStore();
 
+  // When the local post state changes, update the store independently.
+  useEffect(() => {
+    if (post) {
+      updatePost({
+        ...post,
+        post_comments: [{ count: post.post_comments.length }],
+      });
+    }
+  }, [post, updatePost]);
+
   const getPostDetails = useCallback(async (): Promise<void> => {
     try {
       const res = await fetchPostDetails(postId);
       if (res) {
         setPost(res);
-        updatePost({
-          ...res,
-          post_comments: [{ count: res?.post_comments?.length }],
-        });
       }
     } catch (error) {
       console.error(error);
     } finally {
       setStartLoading(false);
     }
-  }, [postId, updatePost]);
+  }, [postId]);
 
   const handleAddNewComment = useCallback(async (): Promise<void> => {
     if (!commentRef.current) return;
@@ -86,10 +93,10 @@ const PostDetails: React.FC = () => {
     try {
       const res = await createPostComment(data);
       if (res) {
-        // Optionally send notification here later.
         inputRef.current?.clear();
         commentRef.current = "";
         showToast("success", "Success", "Comment added successfully!");
+        // Optionally, re-fetch the post details here.
       }
     } catch (error: any) {
       console.error(error);
@@ -104,21 +111,11 @@ const PostDetails: React.FC = () => {
       try {
         const res = await removePostComment(comment.id);
         if (res && post) {
-          setPost((prevPost) => {
-            if (!prevPost) return prevPost;
-            const updatedComments = prevPost.post_comments.filter(
-              (item) => item.id !== comment.id
-            );
-            const updatedPost = {
-              ...prevPost,
-              post_comments: updatedComments,
-            };
-            updatePost({
-              ...updatedPost,
-              post_comments: [{ count: updatedComments.length }],
-            });
-            return updatedPost;
-          });
+          // Update local post state only.
+          const updatedComments = post.post_comments.filter(
+            (item) => item.id !== comment.id
+          );
+          setPost({ ...post, post_comments: updatedComments });
           showToast("success", "Success", "Comment deleted successfully!");
         }
       } catch (error: any) {
@@ -126,7 +123,7 @@ const PostDetails: React.FC = () => {
         showToast("error", "Error", error.message);
       }
     },
-    [post, updatePost]
+    [post]
   );
 
   const handleNewCommentEvent = useCallback(
@@ -136,27 +133,19 @@ const PostDetails: React.FC = () => {
           const newComment: Comment = { ...payload.new };
           const userData = await getUserData(newComment.user_id, false);
           newComment.user = userData ?? {};
-          setPost((prevPost) => {
-            if (!prevPost) return prevPost;
-            updatePost({
-              ...prevPost,
-              post_comments: [
-                { count: [newComment, ...prevPost.post_comments].length },
-              ],
+          if (post) {
+            setPost({
+              ...post,
+              post_comments: [newComment, ...post.post_comments],
             });
-
-            return {
-              ...prevPost,
-              post_comments: [newComment, ...prevPost.post_comments],
-            };
-          });
+          }
         }
       } catch (error: any) {
         console.error(error);
         showToast("error", "Error", error.message);
       }
     },
-    []
+    [post]
   );
 
   useEffect(() => {
@@ -186,8 +175,7 @@ const PostDetails: React.FC = () => {
     try {
       if (!post) return;
 
-      const res = await removePost(post.id);
-
+      const res = await removePost(post.id, post?.file);
       if (res) {
         let updatedPosts = posts.filter((item) => item.id !== post.id);
         setPosts(updatedPosts);
@@ -201,7 +189,6 @@ const PostDetails: React.FC = () => {
 
   const onEditPost = async () => {
     router.back();
-
     router.push({
       pathname: "/add_post",
       params: {
