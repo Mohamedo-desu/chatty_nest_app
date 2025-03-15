@@ -1,24 +1,18 @@
 import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
 import LanguageModal from "@/components/ui/LanguageModal";
-import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { TouchableOpacity, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
-import {
-  createStyleSheet,
-  UnistylesRuntime,
-  useStyles,
-} from "react-native-unistyles";
+import { createStyleSheet, useStyles } from "react-native-unistyles";
 
 const HEADER_ICON_SIZE = RFValue(12);
 
@@ -33,12 +27,8 @@ const OnboardingScreen = () => {
     handleChangeLanguage,
   } = useLanguage();
 
-  useEffect(() => {
-    UnistylesRuntime.setImmersiveMode(true);
-  }, []);
-
   return (
-    <LinearGradient colors={Colors.gradient} style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -84,7 +74,7 @@ const OnboardingScreen = () => {
         languages={languages}
         onLanguageSelect={handleChangeLanguage}
       />
-    </LinearGradient>
+    </View>
   );
 };
 
@@ -133,12 +123,12 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     position: "absolute",
     bottom: 35,
     borderRadius: theme.border.full,
-    backgroundColor: theme.Colors.white,
+    backgroundColor: theme.Colors.primary,
   },
   buttonText: {
     fontFamily: Fonts.SemiBold,
     fontSize: RFValue(18),
-    color: theme.Colors.primary,
+    color: theme.Colors.white,
   },
   flagIcon: {},
 }));

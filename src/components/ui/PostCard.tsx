@@ -4,24 +4,29 @@ import { downloadFile } from "@/services/mediaServices";
 import { createPostLike, removePostLike } from "@/services/postService";
 import { usePostStore } from "@/store/postStore"; // Import the store
 import { DEVICE_WIDTH } from "@/utils/device";
-import { shortenNumber, stripHtmlTags } from "@/utils/functions";
+import { stripHtmlTags } from "@/utils/functions";
 import { formatRelativeTime } from "@/utils/timeUtils";
 import { Image, ImageBackground } from "expo-image";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { FC, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   Pressable,
   Share,
   TouchableOpacity,
   View,
 } from "react-native";
+import AnimatedNumbers from "react-native-animated-numbers";
 import {
   ChatBubbleBottomCenterTextIcon,
   EllipsisHorizontalIcon,
   HeartIcon,
+  PencilSquareIcon,
   ShareIcon,
+  TrashIcon,
   XMarkIcon,
 } from "react-native-heroicons/solid";
 import RenderHTML from "react-native-render-html";
@@ -88,6 +93,9 @@ const PostCard: FC<PostCardProps> = ({
   currentUser,
   router,
   isDetails = false,
+  canDelete = false,
+  onDelete,
+  onEdit,
 }) => {
   const { styles, theme } = useStyles(stylesheet);
   const isVideo = item.file && item.file.includes("videos");
@@ -95,6 +103,7 @@ const PostCard: FC<PostCardProps> = ({
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
   const [likes, setLikes] = useState<PostLike[]>([]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   // Get the updatePost action from the store.
   const { updatePost } = usePostStore();
@@ -158,6 +167,25 @@ const PostCard: FC<PostCardProps> = ({
     }
   };
 
+  const handleDeleteComment = () => {
+    Alert.alert(
+      t("commentCard.alertDeleteTitle"),
+      t("commentCard.alertDeleteDescription"),
+      [
+        {
+          text: t("commentCard.alertDeleteYes"),
+          onPress: () => onDelete(),
+        },
+        {
+          text: t("commentCard.alertDeleteNo"),
+          onPress: undefined,
+          style: "cancel",
+        },
+      ]
+    );
+  };
+  //console.log({ item });
+
   const handleOpenPostDetails = () => {
     if (isDetails) return;
     router.push({
@@ -207,6 +235,19 @@ const PostCard: FC<PostCardProps> = ({
               />
             </TouchableOpacity>
           )}
+          {canDelete && (
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={onEdit}>
+                <PencilSquareIcon
+                  size={RFValue(15)}
+                  color={theme.Colors.secondary}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeleteComment}>
+                <TrashIcon size={RFValue(15)} color={Colors.error} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <View style={styles.content}>
           <View style={styles.postBody}>
@@ -243,9 +284,12 @@ const PostCard: FC<PostCardProps> = ({
                 color={liked ? theme.Colors.primary : theme.Colors.gray[500]}
               />
             </TouchableOpacity>
-            <CustomText style={styles.count}>
-              {shortenNumber(likes?.length)}
-            </CustomText>
+            <AnimatedNumbers
+              includeComma
+              animationDuration={500}
+              animateToNumber={likes?.length}
+              fontStyle={styles.count}
+            />
           </View>
           <View style={styles.footerButton}>
             <TouchableOpacity onPress={handleOpenPostDetails}>
@@ -254,9 +298,12 @@ const PostCard: FC<PostCardProps> = ({
                 color={theme.Colors.gray[500]}
               />
             </TouchableOpacity>
-            <CustomText style={styles.count}>
-              {shortenNumber(item?.post_comments[0]?.count)}
-            </CustomText>
+            <AnimatedNumbers
+              includeComma
+              animationDuration={500}
+              animateToNumber={item?.post_comments[0]?.count}
+              fontStyle={styles.count}
+            />
           </View>
           <View style={styles.footerButton}>
             <TouchableOpacity onPress={handleShare}>
@@ -407,4 +454,9 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     color: Colors.white,
   },
   modalIconContainer: {},
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+  },
 }));

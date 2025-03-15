@@ -3,11 +3,7 @@ import { showToast } from "@/components/toast/ShowToast";
 import PostCard from "@/components/ui/PostCard";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
-import {
-  fetchPosts,
-  getPostComments,
-  getPostLikes,
-} from "@/services/postService";
+import { fetchPosts } from "@/services/postService";
 import { getUserData } from "@/services/userService";
 import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
@@ -63,14 +59,9 @@ const ForYou = () => {
     if (payload.eventType === "INSERT" && payload.new.id) {
       let newPost = { ...payload.new };
       const userData = await getUserData(newPost.user_id, false);
-      const likesData = await getPostLikes(newPost.id, currentUser.user_id);
-      const commentsData = await getPostComments(
-        newPost.id,
-        currentUser.user_id
-      );
       newPost.user = userData ?? {};
-      newPost.post_likes = likesData ?? [];
-      newPost.post_comments = commentsData ?? [];
+      newPost.post_likes = [];
+      newPost.post_comments = [{ count: 0 }];
       setPosts([newPost, ...usePostStore.getState().posts]);
     }
   };
@@ -81,7 +72,12 @@ const ForYou = () => {
       .channel("posts")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "posts" },
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+          filter: `type=eq.public`,
+        },
         handlePostEvent
       )
       .subscribe();

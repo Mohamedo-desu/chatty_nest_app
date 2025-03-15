@@ -4,13 +4,15 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { uploadMedia } from "@/services/mediaServices";
+import { fetchPostDetails } from "@/services/postService";
+import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -28,10 +30,24 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
-// Narrow the file type to the asset returned from ImagePicker
+// Define TS types for the post and the editor ref
+interface Post {
+  id: string;
+  file: string;
+  body: string;
+  type: "public" | "private";
+  post_likes?: unknown[];
+  post_comments?: Array<{ count: number }>;
+}
+
+interface RichTextEditorRef {
+  setContentHTML: (html: string) => void;
+}
+
 type MediaFile = ImagePicker.ImagePickerAsset | null;
 
 interface PostBodyData {
+  id?: string;
   file: string;
   body: string;
   user_id: string;
@@ -41,38 +57,41 @@ interface PostBodyData {
 const AddNewPostScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { currentUser } = useUserStore();
+  const { updatePost } = usePostStore();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [post, setPost] = useState<Post | null>(null);
 
+  const { postId } = useLocalSearchParams<{ postId?: string }>();
   const { t } = useTranslation();
 
-  // For storing the post text
+  // Refs for storing post body and editor instance
   const bodyRef = useRef<string>("");
-  // Replace unknown with a proper ref type if available from RichTextEditor
-  const editorRef = useRef<unknown>(null);
+  const editorRef = useRef<RichTextEditorRef | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<MediaFile>(null);
   const [postType, setPostType] = useState<"public" | "private">("public");
 
-  const player =
-    file && file.uri.includes("videos")
-      ? useVideoPlayer(file.uri, (player) => {
-          player.loop = true;
-          player.play();
-        })
-      : null;
+  // Always compute a videoUri (empty string if not applicable) to ensure hook order is maintained.
+  const videoUri: string = file && file.type === "video" ? file.uri : "";
+  const player = useVideoPlayer(videoUri, (playerInstance) => {
+    if (videoUri) {
+      playerInstance.loop = true;
+      playerInstance.play();
+    }
+  });
 
-  const onPick = async (isImage: boolean): Promise<void> => {
+  // Handle media selection from gallery
+  const onPick = useCallback(async (isImage: boolean): Promise<void> => {
     try {
       const mediaConfig: ImagePicker.ImagePickerOptions = {
         mediaTypes: isImage ? ["images"] : ["videos"],
         allowsEditing: true,
         quality: 0.7,
-        // Only images need an aspect ratio option
         ...(isImage && { aspect: [4, 3] }),
       };
 
       const result = await ImagePicker.launchImageLibraryAsync(mediaConfig);
-
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setFile(result.assets[0]);
       }
@@ -80,22 +99,25 @@ const AddNewPostScreen: React.FC = () => {
       console.error("Error picking media:", error);
       showToast("error", "Error", error.message);
     }
-  };
+  }, []);
 
-  const onSubmit = async (): Promise<void> => {
+  // Submit post creation or update
+  const onSubmit = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      if (!bodyRef.current && !file) {
+      // Validate at least one of the fields is provided
+      if (!bodyRef.current.trim() && !file) {
         Alert.alert(
           t("addPost.submitAlertError"),
           t("addPost.submitAlertErrorDesc")
         );
+        setLoading(false);
         return;
       }
 
       let postMediaUrl = "";
       if (file) {
-        // Upload file if it is local, else use the existing URL.
+        // Upload the file if it's a local file; otherwise, use the existing URL.
         if (file.uri.startsWith("file://")) {
           postMediaUrl = await uploadMedia(
             file.uri,
@@ -114,6 +136,10 @@ const AddNewPostScreen: React.FC = () => {
         type: postType,
       };
 
+      if (post?.id) {
+        bodyData.id = post.id;
+      }
+
       const { data, error } = await client
         .from("posts")
         .upsert(bodyData)
@@ -125,15 +151,31 @@ const AddNewPostScreen: React.FC = () => {
       }
 
       if (data) {
-        // Reset the post upon successful creation
+        // Reset fields upon success
         bodyRef.current = "";
         setFile(null);
         editorRef.current?.setContentHTML("");
         showToast(
           "success",
           t("addPost.submitSuccessTitle"),
-          t("addPost.submitSuccessDesc")
+          post?.id
+            ? t("addPost.submitSuccessUpdateDesc")
+            : t("addPost.submitSuccessAddDesc")
         );
+
+        if (post?.id) {
+          // Update the post in store if it's an update
+
+          const updatedPost: Post = {
+            ...post,
+            body: bodyData.body,
+            file: bodyData.file,
+            type: bodyData.type,
+            post_likes: Array.isArray(post.post_likes) ? post.post_likes : [],
+            post_comments: [{ count: post.post_comments?.length }],
+          };
+          updatePost(updatedPost);
+        }
         router.back();
       }
     } catch (error: any) {
@@ -146,7 +188,47 @@ const AddNewPostScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser.user_id, file, post, postType, t, updatePost]);
+
+  // Fetch post details if editing an existing post
+  const getPostDetails = useCallback(async (): Promise<void> => {
+    try {
+      const res = await fetchPostDetails(postId as string);
+      if (res) {
+        setPost(res);
+      }
+    } catch (error) {
+      console.error("Error fetching post details:", error);
+    }
+  }, [postId]);
+
+  // Update fields when a post is loaded (for editing)
+  useEffect(() => {
+    if (post && post.id) {
+      const fileUri = post.file;
+      const fileType: "video" | "image" = fileUri.includes("videos")
+        ? "video"
+        : "image";
+      const fileName = fileUri.split("/").pop() ?? "unknown_file";
+
+      setFile({ uri: fileUri, type: fileType, fileName });
+      bodyRef.current = post.body;
+      setPostType(post.type);
+
+      // Delay setting content to allow the editor to mount
+      const timeoutId = setTimeout(() => {
+        editorRef.current?.setContentHTML(post.body);
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [post]);
+
+  useEffect(() => {
+    if (postId) {
+      getPostDetails();
+    }
+  }, [postId, getPostDetails]);
 
   return (
     <ScrollView
@@ -261,7 +343,7 @@ const AddNewPostScreen: React.FC = () => {
       </View>
       <View style={styles.spacer} />
       <CustomButton
-        text={t("addPost.submit")}
+        text={post?.id ? t("addPost.update") : t("addPost.post")}
         loading={loading}
         onPress={onSubmit}
       />
@@ -334,7 +416,6 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     padding: 5,
     borderRadius: 100,
   },
-  /* New Post Type Styles */
   postTypeContainer: {
     marginVertical: 10,
   },

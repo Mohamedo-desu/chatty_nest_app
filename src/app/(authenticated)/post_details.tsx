@@ -9,6 +9,7 @@ import { Fonts } from "@/constants/Fonts";
 import {
   createPostComment,
   fetchPostDetails,
+  removePost,
   removePostComment,
 } from "@/services/postService";
 import { getUserData } from "@/services/userService";
@@ -54,7 +55,7 @@ const PostDetails: React.FC = () => {
   const inputRef = useRef<TextInput>(null);
   const commentRef = useRef<string>("");
 
-  const { updatePost } = usePostStore();
+  const { updatePost, setPosts, posts } = usePostStore();
   const { currentUser } = useUserStore();
 
   const getPostDetails = useCallback(async (): Promise<void> => {
@@ -88,9 +89,11 @@ const PostDetails: React.FC = () => {
         // Optionally send notification here later.
         inputRef.current?.clear();
         commentRef.current = "";
+        showToast("success", "Success", "Comment added successfully!");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast("error", "Error", error.message);
     } finally {
       setLoading(false);
     }
@@ -148,8 +151,9 @@ const PostDetails: React.FC = () => {
             };
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
+        showToast("error", "Error", error.message);
       }
     },
     []
@@ -177,6 +181,34 @@ const PostDetails: React.FC = () => {
       client.removeChannel(commentChannel);
     };
   }, [getPostDetails, handleNewCommentEvent, postId]);
+
+  const onDeletePost = async () => {
+    try {
+      if (!post) return;
+
+      const res = await removePost(post.id);
+
+      if (res) {
+        let updatedPosts = posts.filter((item) => item.id !== post.id);
+        setPosts(updatedPosts);
+        showToast("success", "Success", "Post deleted successfully!");
+        router.back();
+      }
+    } catch (error: any) {
+      showToast("error", "Error", error.message);
+    }
+  };
+
+  const onEditPost = async () => {
+    router.back();
+
+    router.push({
+      pathname: "/add_post",
+      params: {
+        postId,
+      },
+    });
+  };
 
   if (startLoading) {
     return (
@@ -209,6 +241,9 @@ const PostDetails: React.FC = () => {
           }}
           router={router}
           isDetails={true}
+          canDelete={currentUser.user_id === post.user_id}
+          onDelete={onDeletePost}
+          onEdit={onEditPost}
         />
 
         <View style={styles.inputContainer}>

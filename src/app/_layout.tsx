@@ -24,7 +24,12 @@ import { vexo } from "vexo-analytics";
 import "../translations/i18n";
 import "../unistyle/unistyles";
 
-LogBox.ignoreLogs(["Clerk: Clerk has been loaded with development keys"]);
+LogBox.ignoreLogs([
+  "Clerk: Clerk has been loaded with development keys",
+  "Warning: TNodeChildrenRenderer:",
+  "Warning: MemoizedTNodeRenderer:",
+  "Warning: TRenderEngineProvider: ",
+]);
 
 const manifest = Updates.manifest;
 const metadata = "metadata" in manifest ? manifest.metadata : undefined;

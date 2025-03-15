@@ -5,11 +5,12 @@ export const fetchPosts = async (limit = 10) => {
     .from("posts")
     .select(
       `*,
-        user:users (user_id,display_name,user_name,photo_url),
+        user:users (user_id, display_name, user_name, photo_url),
         post_likes (*),
         post_comments (count)
-        `
+      `
     )
+    .eq("type", "public")
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -20,6 +21,7 @@ export const fetchPosts = async (limit = 10) => {
     return data;
   }
 };
+
 export const createPostLike = async (postLike) => {
   const { data, error } = await client
     .from("post_likes")
@@ -124,4 +126,35 @@ export const createPostComment = async (postComment) => {
   if (data) {
     return data;
   }
+};
+
+export const fetchUserPosts = async (limit = 10, userId: string) => {
+  const { data, error } = await client
+    .from("posts")
+    .select(
+      `*,
+        user:users (user_id, display_name, user_name, photo_url),
+        post_likes (*),
+        post_comments (count)
+      `
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+  if (data) {
+    return data;
+  }
+};
+export const removePost = async (postId: string | number) => {
+  const { error } = await client.from("posts").delete().eq("id", postId);
+
+  if (error) {
+    throw error;
+  }
+
+  return postId;
 };
