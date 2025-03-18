@@ -190,6 +190,7 @@ export const createPostComment = async (postComment, notification) => {
   // Check notification settings for the recipient user.
   // It is assumed that notification.recipientId contains the ID of the post owner.
   const recipientUserId = notification.recipientId;
+
   if (recipientUserId) {
     const { data: settings, error: settingsError } = await client
       .from("notification_settings")
@@ -223,7 +224,7 @@ export const createPostComment = async (postComment, notification) => {
         title: "New Comment!",
         body: messageBody,
         data: {
-          url: `/(authenticated)/post_details?postId=${notification.postId}`,
+          url: `/(authenticated)/post_details?postId=${notification.postId}&commentId=${data.id}`,
         },
       };
 

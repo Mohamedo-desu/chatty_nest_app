@@ -1,89 +1,83 @@
 import CustomText from "@/components/CustomText";
 import ChatCard from "@/components/ui/ChatCard";
 import { Colors } from "@/constants/Colors";
-import dayjs from "dayjs";
-import React, { useState } from "react";
+import { useChatStore } from "@/store/chatStore";
+import { useUserStore } from "@/store/userStore";
+import { client } from "@/supabase/config";
+import React, { useEffect, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
-// Placeholder chat items array
-const chatItems = [
-  {
-    photo: "https://i.pravatar.cc/200?img=1",
-    name: "Alice",
-    lastMessageTime: dayjs().subtract(10, "days").toISOString(),
-    lastMessage: {
-      user: { name: "Alice" },
-      text: "Hey, how are you?",
-      seen: false,
-      received: true,
-    },
-  },
-  {
-    photo: "https://i.pravatar.cc/200?img=2",
-    name: "Bob",
-    lastMessageTime: dayjs().subtract(1, "hour").toISOString(),
-    lastMessage: {
-      user: { name: "Isra" }, // current user's name is "Isra"
-      text: "I'm doing well, thanks!",
-      seen: false,
-      received: false,
-    },
-  },
-  {
-    photo: "https://i.pravatar.cc/200?img=3",
-    name: "Charlie",
-    lastMessageTime: dayjs().subtract(9, "hour").toISOString(),
-    lastMessage: {
-      user: { name: "Charlie" },
-      text: "Let's catch up later.",
-      seen: false,
-      received: false,
-    },
-  },
-  {
-    photo: "https://i.pravatar.cc/200?img=4",
-    name: "Dave",
-    lastMessageTime: dayjs().subtract(10, "days").toISOString(),
-    lastMessage: {
-      user: { name: "Dave" },
-      text: "Sorry, message failed to send.",
-      // No flag provided—will fall back to the error icon.
-    },
-  },
-];
-
 const ChatsScreen = () => {
   const { styles } = useStyles(stylesheet);
-
+  const { chatItems, fetchChats, error } = useChatStore();
   const [refreshing, setRefreshing] = useState(false);
+  const { currentUser } = useUserStore();
 
-  const renderItem = ({ item }: { item: (typeof chatItems)[0] }) => (
-    <ChatCard item={item} />
+  useEffect(() => {
+    onRefresh();
+  }, []);
+
+  const handleNewChatEvent = (payload: any) => {
+    const newConversation = payload.new;
+
+    console.log("New conversation:", newConversation);
+
+    if (newConversation.participants.includes(currentUser.user_id)) {
+      fetchChats();
+    }
+  };
+
+  // Set up realtime listener for new chats
+  useEffect(() => {
+    const subscription = client
+      .channel("conversations")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "conversations",
+          filter: "chat_type=eq.one_to_one",
+        },
+        handleNewChatEvent
+      )
+      .subscribe();
+    return () => {
+      client.removeChannel(subscription);
+    };
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchChats();
+    setRefreshing(false);
+  };
+
+  const renderItem = ({ item }: { item: any }) => (
+    <ChatCard item={item} currentUser={currentUser} />
   );
 
   return (
     <FlatList
       style={styles.page}
       contentContainerStyle={styles.contentContainerStyle}
-      refreshing={refreshing}
-      onRefresh={() => setRefreshing(true)}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => setRefreshing(true)}
+          onRefresh={onRefresh}
           colors={[Colors.white]}
           progressBackgroundColor={Colors.primary}
         />
       }
-      data={[]}
+      data={chatItems}
       renderItem={renderItem}
-      keyExtractor={(_, index) => index.toString()}
+      keyExtractor={(item) => item.conversation_id}
       ListEmptyComponent={() => (
         <View style={styles.emptyContainer}>
           <CustomText variant="h7" style={styles.emptyText}>
-            You have no chats yet
+            {error ? error : "You have no chats yet"}
           </CustomText>
         </View>
       )}

@@ -39,11 +39,10 @@ export const useUserStore = create<UserState>()(
           "pushTokenString",
           "user-storage",
           "settings-storage",
-          "post-storage",
         ]);
 
-        signOut();
         set({ currentUser: defaultUser });
+        signOut();
       },
     }),
     {

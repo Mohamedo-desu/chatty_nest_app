@@ -41,6 +41,7 @@ interface Post {
 
 interface PostDetailsParams {
   postId: string;
+  commentId: string;
 }
 
 interface RealtimePayload {
@@ -49,7 +50,8 @@ interface RealtimePayload {
 
 const PostDetails: React.FC = () => {
   const { styles } = useStyles(stylesheet);
-  const { postId } = useLocalSearchParams<PostDetailsParams>();
+  const { postId, commentId } = useLocalSearchParams();
+
   const [startLoading, setStartLoading] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [post, setPost] = useState<Post | null>(null);
@@ -264,6 +266,7 @@ const PostDetails: React.FC = () => {
                 currentUser.user_id === comment.user_id ||
                 currentUser.user_id === post.user_id
               }
+              highlight={comment.id === commentId}
               onDelete={() => onDelete(comment)}
             />
           ))}

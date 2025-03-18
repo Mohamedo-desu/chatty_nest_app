@@ -1,26 +1,56 @@
 import { Colors } from "@/constants/Colors";
-import { IMessage } from "@/types";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ImageBackground, Modal, TouchableOpacity, View } from "react-native";
-import { moderateScale } from "react-native-size-matters";
-import { createStyleSheet, useStyles } from "react-native-unistyles";
-
-// Import Heroicons from react native heroicons
 import { Fonts } from "@/constants/Fonts";
 import { capitalizeWords } from "@/utils/functions";
 import { formatRelativeTime } from "@/utils/timeUtils";
+import { Image, ImageBackground } from "expo-image";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { ExclamationCircleIcon } from "react-native-heroicons/outline";
-import { CheckCircleIcon, CheckIcon } from "react-native-heroicons/solid";
+import {
+  CheckCircleIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "react-native-heroicons/solid";
 import { RFValue } from "react-native-responsive-fontsize";
+import { moderateScale } from "react-native-size-matters";
+import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "../CustomText";
 
-const ChatCard = ({ item }: { item: IMessage }) => {
+const ChatCard = ({ item, currentUser }) => {
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
-  const myName = "Isra";
+  const uid = currentUser.user_id;
   const router = useRouter();
   const { styles, theme } = useStyles(stylesheet);
+
+  const getStatusIndicator = () => {
+    const msg = item?.lastMessage;
+    if (msg && msg.user?.id === uid) {
+      if (msg.seen) {
+        return (
+          <CheckCircleIcon size={RFValue(20)} color={theme.Colors.success} />
+        );
+      } else if (msg.received) {
+        return (
+          <CheckIcon size={moderateScale(20)} color={theme.Colors.gray[300]} />
+        );
+      } else {
+        return (
+          <ExclamationCircleIcon
+            size={moderateScale(20)}
+            color={Colors.error}
+          />
+        );
+      }
+    } else if (item?.unseenCount > 0) {
+      return (
+        <View style={styles.badgeContainer}>
+          <CustomText style={styles.badgeText}>{item.unseenCount}</CustomText>
+        </View>
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -30,7 +60,7 @@ const ChatCard = ({ item }: { item: IMessage }) => {
           style={styles.photoContainer}
         >
           <Image
-            source={{ uri: item.photo }}
+            source={{ uri: item?.photo }}
             contentFit="cover"
             style={styles.photo}
           />
@@ -40,7 +70,13 @@ const ChatCard = ({ item }: { item: IMessage }) => {
           onPress={() =>
             router.navigate({
               pathname: "/chat_details",
-              params: { ...item },
+              params: {
+                conversationId: item?.conversation_id,
+                name: item?.name,
+                photo: item?.photo,
+                push_tokens: JSON.stringify(item.push_tokens),
+                other_user_id: item.otherUserId,
+              },
             })
           }
         >
@@ -51,10 +87,10 @@ const ChatCard = ({ item }: { item: IMessage }) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {capitalizeWords(item.name)}
+                {capitalizeWords(item?.name)}
               </CustomText>
               <CustomText style={styles.timeText}>
-                {formatRelativeTime(item.lastMessageTime)}
+                {formatRelativeTime(item?.lastMessageTime)}
               </CustomText>
             </View>
             <View style={styles.messageRow}>
@@ -63,34 +99,12 @@ const ChatCard = ({ item }: { item: IMessage }) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {item.lastMessage.user.name === myName && (
+                {item?.lastMessage && item.lastMessage.user.id === uid && (
                   <CustomText style={styles.youText}>You : </CustomText>
                 )}
-                {item.lastMessage.text}
+                {item?.lastMessage?.text}
               </CustomText>
-
-              {myName !== item.lastMessage.user.name ? (
-                <View style={styles.unreadBadge}>
-                  <CustomText style={styles.unreadText} variant="h7">
-                    5
-                  </CustomText>
-                </View>
-              ) : item.lastMessage.seen ? (
-                <CheckCircleIcon
-                  size={RFValue(20)}
-                  color={theme.Colors.success}
-                />
-              ) : item.lastMessage.received ? (
-                <CheckIcon
-                  size={moderateScale(20)}
-                  color={theme.Colors.gray[300]}
-                />
-              ) : (
-                <ExclamationCircleIcon
-                  size={moderateScale(20)}
-                  color={Colors.error}
-                />
-              )}
+              {getStatusIndicator()}
             </View>
           </>
         </TouchableOpacity>
@@ -102,35 +116,25 @@ const ChatCard = ({ item }: { item: IMessage }) => {
         onDismiss={() => setPhotoModalVisible(false)}
         animationType="fade"
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setPhotoModalVisible(false)}
-          style={styles.modalBackground}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {}}
-            style={styles.modalContentContainer}
+        <View style={styles.modalBackground}>
+          <ImageBackground
+            source={{ uri: item.photo }}
+            contentFit="cover"
+            style={styles.modalImageBackground}
+            transition={100}
           >
-            <ImageBackground
-              source={{ uri: item.photo }}
-              resizeMode="contain"
-              style={styles.modalImageBackground}
-            >
-              <View style={styles.modalImageOverlay}>
-                <CustomText style={styles.modalNameText}>
-                  {item.name}
-                </CustomText>
-              </View>
-            </ImageBackground>
-            <View style={styles.modalIconContainer}>
-              <CheckCircleIcon
-                size={moderateScale(32)}
-                color={Colors.primary}
-              />
+            <View style={styles.modalImageOverlay}>
+              <CustomText style={styles.modalNameText}>{item.name}</CustomText>
+              <Pressable
+                style={styles.closeIcon}
+                hitSlop={10}
+                onPress={() => setPhotoModalVisible(false)}
+              >
+                <XMarkIcon size={RFValue(22)} color={Colors.error} />
+              </Pressable>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </ImageBackground>
+        </View>
       </Modal>
     </>
   );
@@ -154,67 +158,41 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     borderRadius: moderateScale(20),
     overflow: "hidden",
   },
-  photo: {
-    width: "100%",
-    height: "100%",
-  },
-  contentContainer: {
-    flex: 1,
-    marginLeft: 10,
-    gap: 5,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  nameText: {
-    fontSize: RFValue(16),
-    fontFamily: Fonts.SemiBold,
-    flex: 1,
-  },
+  photo: { width: "100%", height: "100%" },
+  contentContainer: { flex: 1, marginLeft: 10, gap: 5 },
+  headerRow: { flexDirection: "row", alignItems: "center", flex: 1 },
+  nameText: { fontSize: RFValue(13), fontFamily: Fonts.SemiBold, flex: 1 },
   timeText: {
     fontSize: RFValue(10),
     fontFamily: Fonts.Regular,
     color: Colors.primary,
   },
-  messageRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
+  messageRow: { flexDirection: "row", alignItems: "center", flex: 1 },
   messageText: {
     flex: 1,
     fontSize: RFValue(12),
     fontFamily: Fonts.Regular,
     textTransform: "capitalize",
   },
-  youText: {
-    fontSize: RFValue(12),
-    fontFamily: Fonts.Regular,
-  },
-  unreadBadge: {
-    backgroundColor: Colors.primary,
-    height: moderateScale(6),
+  youText: { fontSize: RFValue(12), fontFamily: Fonts.Regular },
+  badgeContainer: {
+    backgroundColor: Colors.error,
     width: 20,
     aspectRatio: 1,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  unreadText: {
+  badgeText: {
     color: Colors.white,
+    fontSize: RFValue(10),
+    fontFamily: Fonts.Regular,
   },
   modalBackground: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.2)",
-  },
-  modalContentContainer: {
-    width: "90%",
-    height: "70%",
-    position: "relative", // Absolute children are positioned relative to this container
   },
   modalImageBackground: {
     width: "100%",
@@ -223,8 +201,11 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     backgroundColor: Colors.primary[300],
   },
   modalImageOverlay: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    padding: moderateScale(1),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 15,
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalNameText: {
     fontSize: RFValue(20),
@@ -232,13 +213,9 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     textTransform: "capitalize",
     color: Colors.white,
   },
-  modalIconContainer: {
-    position: "absolute",
-    bottom: 0,
-    backgroundColor: Colors.white,
-    width: "100%",
-    padding: moderateScale(3),
-    justifyContent: "center",
-    alignItems: "center",
+  closeIcon: {
+    backgroundColor: "rgba(0,0,0,0.2)",
+    padding: 5,
+    borderRadius: 100,
   },
 }));

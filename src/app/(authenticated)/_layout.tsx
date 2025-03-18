@@ -89,7 +89,7 @@ const AuthenticatedLayout = () => {
       <Stack.Screen
         name="chat_details"
         options={{
-          headerTitle: t("authenticated.chat_details"),
+          headerTitle: "",
         }}
       />
       <Stack.Screen

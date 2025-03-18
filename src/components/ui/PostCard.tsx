@@ -295,7 +295,7 @@ const PostCard: FC<PostCardProps> = ({
             </TouchableOpacity>
             <AnimatedNumbers
               includeComma
-              animationDuration={500}
+              animationDuration={300}
               animateToNumber={likes?.length}
               fontStyle={styles.count}
             />
@@ -309,7 +309,7 @@ const PostCard: FC<PostCardProps> = ({
             </TouchableOpacity>
             <AnimatedNumbers
               includeComma
-              animationDuration={500}
+              animationDuration={300}
               animateToNumber={item?.post_comments[0]?.count}
               fontStyle={styles.count}
             />
@@ -454,7 +454,6 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     justifyContent: "space-between",
     padding: 15,
     backgroundColor: "rgba(0,0,0,0.5)",
-    marginTop: rt.insets.top,
   },
   modalNameText: {
     fontSize: RFValue(22),

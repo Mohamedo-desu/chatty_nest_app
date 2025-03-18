@@ -50,8 +50,6 @@ const GroupsScreen = () => {
     <FlatList
       style={styles.page}
       contentContainerStyle={styles.contentContainerStyle}
-      refreshing={refreshing}
-      onRefresh={() => setRefreshing(true)}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -60,7 +58,7 @@ const GroupsScreen = () => {
           progressBackgroundColor={Colors.primary}
         />
       }
-      data={[]}
+      data={groupsItems}
       renderItem={renderItem}
       keyExtractor={(_, index) => index.toString()}
       ListEmptyComponent={() => (

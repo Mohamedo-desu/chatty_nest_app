@@ -212,7 +212,7 @@ const stylesheet = createStyleSheet((theme) => ({
     flex: 1,
   },
   title: {
-    fontSize: RFValue(16),
+    fontSize: RFValue(13),
     fontFamily: Fonts.SemiBold,
     flex: 1,
   },

@@ -10,7 +10,12 @@ import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import CustomText from "../CustomText";
 
-const CommentCard = ({ item, onDelete, canDelete = false }) => {
+const CommentCard = ({
+  item,
+  onDelete,
+  highlight = false,
+  canDelete = false,
+}) => {
   const { styles, theme } = useStyles(stylesheet);
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
   const { t } = useTranslation();
@@ -46,7 +51,7 @@ const CommentCard = ({ item, onDelete, canDelete = false }) => {
           style={styles.photo}
         />
       </TouchableOpacity>
-      <View style={styles.content}>
+      <View style={styles.content(highlight)}>
         <View
           style={{
             flexDirection: "row",
@@ -87,7 +92,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     flexDirection: "row",
     gap: 7,
   },
-  content: {
+  content: (highlight) => ({
     flex: 1,
     gap: 5,
     paddingHorizontal: 5,
@@ -95,12 +100,12 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     borderRadius: 8,
     borderCurve: "continuous",
     backgroundColor: theme.Colors.gray[100],
-  },
-  highLight: {
-    borderWidth: 0.2,
-    backgroundColor: theme.Colors.gray[100],
-    borderColor: theme.Colors.gray[200],
-  },
+    borderWidth: highlight ? 0.5 : 0,
+    borderStyle: highlight ? "dashed" : "solid",
+    borderColor: theme.Colors.primary,
+    elevation: highlight ? 3 : 0,
+  }),
+
   nameContainer: {
     flexDirection: "row",
     alignItems: "center",
