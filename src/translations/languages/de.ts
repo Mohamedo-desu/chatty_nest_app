@@ -204,10 +204,52 @@ export const de = {
     chats: {
       index: "Chats",
       groups: "Gruppen",
+      emptyChats: "Du hast noch keine Chats",
     },
     home: {
-      index: "Für dich",
-      followings: "Abonniert",
+      index: "Für Dich",
+      followings: "Abonnements",
+      emptyPosts: "Du hast noch keine Beiträge",
+    },
+    addPost: {
+      chooseMedia: "Wähle eine Mediendatei",
+      postType: "Beitragsart:",
+      public: "Öffentlich",
+      private: "Privat",
+      post: "Posten",
+      update: "Aktualisieren",
+      submitAlertError: "Fehler",
+      submitAlertErrorDesc:
+        "Bitte gib etwas Text ein oder wähle eine Datei aus.",
+      submitSuccessTitle: "Erfolg",
+      submitSuccessUpdateDesc: "Dein Beitrag wurde erfolgreich aktualisiert.",
+      submitSuccessAddDesc: "Dein Beitrag wurde erfolgreich hochgeladen.",
+      submitErrorTitle: "Fehler",
+      submitErrorDesc:
+        "Beim Hochladen deines Beitrags ist ein Fehler aufgetreten.",
+      RichEditorPlaceholder: "Schreibe hier etwas...",
+    },
+    commentCard: {
+      alertDeleteTitle: "Bestätigen",
+      alertDeleteDescription: "Bist du sicher, dass du das löschen möchtest?",
+      alertDeleteYes: "Ja",
+      alertDeleteNo: "Nein",
+      addComment: "Kommentar hinzufügen",
+      typeComment: "Schreibe einen Kommentar",
+    },
+    addChat: {
+      search: "Suchen",
+      searchUsers: "Suche nach Nutzern",
+      noUsers: "Keine Nutzer gefunden",
+      resultsFound: "Ergebnisse gefunden",
+    },
+    chatDetails: {
+      type: "Schreibe hier deine Nachricht...",
+      noMessages: "Keine Nachrichten in diesem Gespräch.",
+    },
+    postDetails: {
+      noComments: "Noch keine Kommentare",
+      noPost: "Kein Beitrag",
     },
   },
 };

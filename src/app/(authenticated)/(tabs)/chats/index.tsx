@@ -5,6 +5,7 @@ import { useChatStore } from "@/store/chatStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, RefreshControl, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
@@ -15,14 +16,14 @@ const ChatsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useUserStore();
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     onRefresh();
   }, []);
 
   const handleNewChatEvent = (payload: any) => {
     const newConversation = payload.new;
-
-    console.log("New conversation:", newConversation);
 
     if (newConversation.participants.includes(currentUser.user_id)) {
       fetchChats();
@@ -77,7 +78,7 @@ const ChatsScreen = () => {
       ListEmptyComponent={() => (
         <View style={styles.emptyContainer}>
           <CustomText variant="h7" style={styles.emptyText}>
-            {error ? error : "You have no chats yet"}
+            {error ? error : t("chats.emptyChats")}
           </CustomText>
         </View>
       )}

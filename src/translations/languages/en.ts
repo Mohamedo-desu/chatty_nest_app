@@ -196,10 +196,12 @@ export const en = {
     chats: {
       index: "Chats",
       groups: "Groups",
+      emptyChats: "You have no chats yet",
     },
     home: {
       index: "For You",
       followings: "Followings",
+      emptyPosts: "no posts",
     },
     addPost: {
       chooseMedia: "Select a Media File",
@@ -222,6 +224,22 @@ export const en = {
       alertDeleteDescription: "Are you sure you want to delete this?",
       alertDeleteYes: "Yes",
       alertDeleteNo: "No",
+      addComment: "Add Comment",
+      typeComment: "Type a comment",
+    },
+    addChat: {
+      search: "Search",
+      searchUsers: "Search for users",
+      noUsers: "No users found",
+      resultsFound: "results found",
+    },
+    chatDetails: {
+      type: "Type your message here...",
+      noMessages: "No messages in this conversation.",
+    },
+    postDetails: {
+      noComments: "No comments yet",
+      noPost: "No Post",
     },
   },
 };

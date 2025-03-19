@@ -5,6 +5,7 @@ import { formatRelativeTime } from "@/utils/timeUtils";
 import { Image, ImageBackground } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { ExclamationCircleIcon } from "react-native-heroicons/outline";
 import {
@@ -22,6 +23,8 @@ const ChatCard = ({ item, currentUser }) => {
   const uid = currentUser.user_id;
   const router = useRouter();
   const { styles, theme } = useStyles(stylesheet);
+
+  const { t, i18n } = useTranslation();
 
   const getStatusIndicator = () => {
     const msg = item?.lastMessage;
@@ -90,7 +93,7 @@ const ChatCard = ({ item, currentUser }) => {
                 {capitalizeWords(item?.name)}
               </CustomText>
               <CustomText style={styles.timeText}>
-                {formatRelativeTime(item?.lastMessageTime)}
+                {formatRelativeTime(item?.lastMessageTime, i18n)}
               </CustomText>
             </View>
             <View style={styles.messageRow}>

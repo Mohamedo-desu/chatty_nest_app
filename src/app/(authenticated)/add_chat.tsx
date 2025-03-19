@@ -5,6 +5,7 @@ import { Fonts } from "@/constants/Fonts";
 import { useChatStore } from "@/store/chatStore";
 import { debounce } from "@/utils/functions";
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -23,6 +24,8 @@ const AddNewChat = () => {
   const [searchPhrase, setSearchPhrase] = useState("");
   const [searching, setSearching] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const { t } = useTranslation();
 
   const { searchForUsers, searchedUsers, error } = useChatStore();
 
@@ -64,7 +67,7 @@ const AddNewChat = () => {
             onChangeText={(text) => setSearchPhrase(text)}
           />
         ) : (
-          <CustomText style={styles.search}>Search</CustomText>
+          <CustomText style={styles.search}>{t("addChat.search")}</CustomText>
         )}
 
         {searching ? (
@@ -112,7 +115,7 @@ const AddNewChat = () => {
                 fontSize: RFValue(14),
               }}
             >
-              result(s) found
+              {t("addChat.resultsFound")}
             </CustomText>
           </View>
         )}
@@ -132,7 +135,9 @@ const AddNewChat = () => {
             {loading ? (
               <ActivityIndicator size={"small"} color={theme.Colors.primary} />
             ) : (
-              <CustomText style={styles.emptyText}>No users found</CustomText>
+              <CustomText style={styles.emptyText}>
+                {t("addChat.noUsers")}
+              </CustomText>
             )}
           </View>
         )}

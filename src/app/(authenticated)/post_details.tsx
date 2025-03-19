@@ -19,6 +19,7 @@ import { client } from "@/supabase/config";
 import { stripHtmlTags } from "@/utils/functions";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, ScrollView, TextInput, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
@@ -61,6 +62,8 @@ const PostDetails: React.FC = () => {
 
   const { updatePost, setPosts, posts } = usePostStore();
   const { currentUser } = useUserStore();
+
+  const { t, i18n } = useTranslation();
 
   // When the local post state changes, update the store independently.
   useEffect(() => {
@@ -219,7 +222,7 @@ const PostDetails: React.FC = () => {
   if (!post) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <CustomText variant="h5">Post not found</CustomText>
+        <CustomText variant="h5">{t("postDetails.noPost")}</CustomText>
       </View>
     );
   }
@@ -248,13 +251,16 @@ const PostDetails: React.FC = () => {
           <CustomInput
             inputRef={inputRef}
             handleChange={(value: string) => (commentRef.current = value)}
-            placeholder="Type a Comment"
+            placeholder={t("commentCard.typeComment")}
             multiline
           />
           {loading ? (
             <ActivityIndicator />
           ) : (
-            <CustomButton text="Add Comment" onPress={handleAddNewComment} />
+            <CustomButton
+              text={t("commentCard.addComment")}
+              onPress={handleAddNewComment}
+            />
           )}
         </View>
         <View style={{ marginVertical: 15, gap: 17 }}>
@@ -271,7 +277,9 @@ const PostDetails: React.FC = () => {
             />
           ))}
           {post.post_comments.length === 0 && (
-            <CustomText style={styles.notFound}>Be first to comment</CustomText>
+            <CustomText style={styles.notFound}>
+              {t("postDetails.noComments")}
+            </CustomText>
           )}
         </View>
       </ScrollView>

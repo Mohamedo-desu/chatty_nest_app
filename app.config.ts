@@ -115,8 +115,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         "expo-notifications",
         {
-          icon: "",
-          color: "#ab21c7",
+          icon: "./assets/icons/splash-icon.png",
+          color: "#2C71B7",
           defaultChannel: "default",
           sounds: [],
           enableBackgroundRemoteNotifications: true,
@@ -150,8 +150,8 @@ export const getDynamicAppConfig = (
       name: `${APP_NAME} Preview`,
       bundleIdentifier: `${BUNDLE_IDENTIFIER}.preview`,
       packageName: `${PACKAGE_NAME}.preview`,
-      icon: "./assets/icons/ios-prev.png",
-      adaptiveIcon: "./assets/icons/Android-Prev.png",
+      icon: "./assets/icons/icon.png",
+      adaptiveIcon: "./assets/icons/adaptive-icon.png",
       scheme: `${SCHEME}-prev`,
     };
   }

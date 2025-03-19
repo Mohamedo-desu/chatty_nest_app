@@ -65,6 +65,9 @@ interface PostCardProps {
   currentUser: User;
   router: any;
   isDetails: boolean; // Replace with a more specific type if available
+  canDelete?: boolean;
+  onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 const getTagsStyles = (theme: any) => ({
@@ -103,7 +106,7 @@ const PostCard: FC<PostCardProps> = ({
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
   const [likes, setLikes] = useState<PostLike[]>([]);
   const [loading, setLoading] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Get the updatePost action from the store.
   const { updatePost } = usePostStore();
@@ -182,7 +185,7 @@ const PostCard: FC<PostCardProps> = ({
       [
         {
           text: t("commentCard.alertDeleteYes"),
-          onPress: () => onDelete(),
+          onPress: () => onDelete && onDelete(),
         },
         {
           text: t("commentCard.alertDeleteNo"),
@@ -192,7 +195,6 @@ const PostCard: FC<PostCardProps> = ({
       ]
     );
   };
-  //console.log({ item });
 
   const handleOpenPostDetails = () => {
     if (isDetails) return;
@@ -228,7 +230,7 @@ const PostCard: FC<PostCardProps> = ({
                 {item.user.display_name}
               </CustomText>
               <CustomText style={styles.postTime}>
-                {formatRelativeTime(item.created_at)}
+                {formatRelativeTime(item.created_at, i18n)}
               </CustomText>
             </View>
           </View>
@@ -386,9 +388,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     alignItems: "center",
     gap: 10,
   },
-  content: {
-    // Additional content styles if needed
-  },
+  content: {},
   postBody: { marginBottom: 10 },
   postMedia: {
     height: moderateScale(300),

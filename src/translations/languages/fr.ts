@@ -205,10 +205,53 @@ export const fr = {
     chats: {
       index: "Discussions",
       groups: "Groupes",
+      emptyChats: "Vous n'avez pas encore de discussions",
     },
     home: {
-      index: "Pour vous",
+      index: "Pour Vous",
       followings: "Abonnements",
+      emptyPosts: "Vous n'avez pas encore de publications",
+    },
+    addPost: {
+      chooseMedia: "Sélectionnez un fichier média",
+      postType: "Type de publication :",
+      public: "Public",
+      private: "Privé",
+      post: "Publier",
+      update: "Mettre à jour",
+      submitAlertError: "Erreur",
+      submitAlertErrorDesc:
+        "Veuillez entrer du texte ou sélectionner un fichier.",
+      submitSuccessTitle: "Succès",
+      submitSuccessUpdateDesc:
+        "Votre publication a été mise à jour avec succès.",
+      submitSuccessAddDesc: "Votre publication a été téléchargée avec succès.",
+      submitErrorTitle: "Erreur",
+      submitErrorDesc:
+        "Une erreur s'est produite lors du téléchargement de votre publication.",
+      RichEditorPlaceholder: "Écrivez quelque chose ici...",
+    },
+    commentCard: {
+      alertDeleteTitle: "Confirmer",
+      alertDeleteDescription: "Êtes-vous sûr de vouloir supprimer ceci ?",
+      alertDeleteYes: "Oui",
+      alertDeleteNo: "Non",
+      addComment: "Ajouter un commentaire",
+      typeComment: "Tapez un commentaire",
+    },
+    addChat: {
+      search: "Recherche",
+      searchUsers: "Rechercher des utilisateurs",
+      noUsers: "Aucun utilisateur trouvé",
+      resultsFound: "résultats trouvés",
+    },
+    chatDetails: {
+      type: "Tapez votre message ici...",
+      noMessages: "Aucun message dans cette conversation.",
+    },
+    postDetails: {
+      noComments: "Pas encore de commentaires",
+      noPost: "Pas de publication",
     },
   },
 };

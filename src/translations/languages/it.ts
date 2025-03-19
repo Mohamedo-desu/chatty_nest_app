@@ -201,10 +201,52 @@ export const it = {
     chats: {
       index: "Chat",
       groups: "Gruppi",
+      emptyChats: "Non hai ancora chat",
     },
     home: {
       index: "Per Te",
       followings: "Seguiti",
+      emptyPosts: "Non hai ancora post",
+    },
+    addPost: {
+      chooseMedia: "Seleziona un file multimediale",
+      postType: "Tipo di post:",
+      public: "Pubblico",
+      private: "Privato",
+      post: "Pubblica",
+      update: "Aggiorna",
+      submitAlertError: "Errore",
+      submitAlertErrorDesc:
+        "Per favore inserisci del testo o seleziona un file.",
+      submitSuccessTitle: "Successo",
+      submitSuccessUpdateDesc: "Il tuo post è stato aggiornato con successo.",
+      submitSuccessAddDesc: "Il tuo post è stato caricato con successo.",
+      submitErrorTitle: "Errore",
+      submitErrorDesc:
+        "Si è verificato un errore durante il caricamento del tuo post.",
+      RichEditorPlaceholder: "Scrivi qualcosa qui...",
+    },
+    commentCard: {
+      alertDeleteTitle: "Conferma",
+      alertDeleteDescription: "Sei sicuro di voler eliminare questo?",
+      alertDeleteYes: "Sì",
+      alertDeleteNo: "No",
+      addComment: "Aggiungi commento",
+      typeComment: "Scrivi un commento",
+    },
+    addChat: {
+      search: "Cerca",
+      searchUsers: "Cerca utenti",
+      noUsers: "Nessun utente trovato",
+      resultsFound: "risultati trovati",
+    },
+    chatDetails: {
+      type: "Scrivi qui il tuo messaggio...",
+      noMessages: "Non ci sono messaggi in questa conversazione.",
+    },
+    postDetails: {
+      noComments: "Ancora nessun commento",
+      noPost: "Nessun post",
     },
   },
 };

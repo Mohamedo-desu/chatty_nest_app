@@ -202,10 +202,51 @@ export const es = {
     chats: {
       index: "Chats",
       groups: "Grupos",
+      emptyChats: "Aún no tienes chats",
     },
     home: {
       index: "Para Ti",
       followings: "Siguiendo",
+      emptyPosts: "Aún no tienes publicaciones",
+    },
+    addPost: {
+      chooseMedia: "Selecciona un archivo multimedia",
+      postType: "Tipo de publicación:",
+      public: "Público",
+      private: "Privado",
+      post: "Publicar",
+      update: "Actualizar",
+      submitAlertError: "Error",
+      submitAlertErrorDesc:
+        "Por favor, ingresa algo de texto o selecciona un archivo.",
+      submitSuccessTitle: "Éxito",
+      submitSuccessUpdateDesc: "Tu publicación se ha actualizado con éxito.",
+      submitSuccessAddDesc: "Tu publicación se ha subido con éxito.",
+      submitErrorTitle: "Error",
+      submitErrorDesc: "Ocurrió un error al subir tu publicación.",
+      RichEditorPlaceholder: "Escribe algo aquí...",
+    },
+    commentCard: {
+      alertDeleteTitle: "Confirmar",
+      alertDeleteDescription: "¿Estás seguro de que deseas eliminar esto?",
+      alertDeleteYes: "Sí",
+      alertDeleteNo: "No",
+      addComment: "Agregar comentario",
+      typeComment: "Escribe un comentario",
+    },
+    addChat: {
+      search: "Buscar",
+      searchUsers: "Buscar usuarios",
+      noUsers: "No se encontraron usuarios",
+      resultsFound: "resultados encontrados",
+    },
+    chatDetails: {
+      type: "Escribe tu mensaje aquí...",
+      noMessages: "No hay mensajes en esta conversación.",
+    },
+    postDetails: {
+      noComments: "Aún no hay comentarios",
+      noPost: "No hay publicación",
     },
   },
 };

@@ -60,7 +60,6 @@ const TabsLayout = () => {
           ),
           tabBarLabel: t("tabLayout.chats"),
           // Keeping the hard-coded badge for chats, if needed
-          tabBarBadge: 5,
         }}
       />
       <Tabs.Screen

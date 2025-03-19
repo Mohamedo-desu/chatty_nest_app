@@ -202,10 +202,51 @@ export const ja = {
     chats: {
       index: "チャット",
       groups: "グループ",
+      emptyChats: "まだチャットがありません",
     },
     home: {
-      index: "おすすめ",
+      index: "あなたのために",
       followings: "フォロー中",
+      emptyPosts: "まだ投稿がありません",
+    },
+    addPost: {
+      chooseMedia: "メディアファイルを選択",
+      postType: "投稿タイプ：",
+      public: "公開",
+      private: "非公開",
+      post: "投稿",
+      update: "更新",
+      submitAlertError: "エラー",
+      submitAlertErrorDesc:
+        "テキストを入力するか、ファイルを選択してください。",
+      submitSuccessTitle: "成功",
+      submitSuccessUpdateDesc: "投稿が正常に更新されました。",
+      submitSuccessAddDesc: "投稿が正常にアップロードされました。",
+      submitErrorTitle: "エラー",
+      submitErrorDesc: "投稿のアップロード中にエラーが発生しました。",
+      RichEditorPlaceholder: "ここに何か書いてください...",
+    },
+    commentCard: {
+      alertDeleteTitle: "確認",
+      alertDeleteDescription: "本当に削除しますか？",
+      alertDeleteYes: "はい",
+      alertDeleteNo: "いいえ",
+      addComment: "コメントを追加",
+      typeComment: "コメントを入力してください",
+    },
+    addChat: {
+      search: "検索",
+      searchUsers: "ユーザーを検索",
+      noUsers: "ユーザーが見つかりません",
+      resultsFound: "件の結果が見つかりました",
+    },
+    chatDetails: {
+      type: "ここにメッセージを入力してください...",
+      noMessages: "この会話にはメッセージがありません。",
+    },
+    postDetails: {
+      noComments: "まだコメントがありません",
+      noPost: "投稿がありません",
     },
   },
 };

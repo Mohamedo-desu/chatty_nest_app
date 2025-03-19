@@ -18,7 +18,7 @@ const CommentCard = ({
 }) => {
   const { styles, theme } = useStyles(stylesheet);
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleDeleteComment = () => {
     Alert.alert(
@@ -69,7 +69,7 @@ const CommentCard = ({
               ●
             </CustomText>
             <CustomText style={styles.postTime}>
-              {formatRelativeTime(item.created_at)}
+              {formatRelativeTime(item.created_at, i18n)}
             </CustomText>
           </View>
           {canDelete && (

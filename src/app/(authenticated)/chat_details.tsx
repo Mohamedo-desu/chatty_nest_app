@@ -5,11 +5,10 @@ import { useChatStore } from "@/store/chatStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
 import { formatRelativeTime } from "@/utils/timeUtils";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -26,9 +25,6 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 
-dayjs.extend(relativeTime);
-dayjs.locale("en");
-
 const ChatDetailsScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { conversationId, name, photo, push_tokens, other_user_id } =
@@ -37,6 +33,8 @@ const ChatDetailsScreen: React.FC = () => {
       photo: string;
       name: string;
     }>();
+
+  const { t, i18n } = useTranslation();
 
   const {
     fetchMessagesForConversation,
@@ -121,7 +119,7 @@ const ChatDetailsScreen: React.FC = () => {
           {item.content}
         </Text>
         <Text style={styles.timestamp}>
-          {formatRelativeTime(item.created_at)}
+          {formatRelativeTime(item.created_at, i18n)}
         </Text>
       </View>
     );
@@ -181,7 +179,7 @@ const ChatDetailsScreen: React.FC = () => {
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
               <CustomText style={styles.emptyText}>
-                No messages in this conversation.
+                {t("chatDetails.noMessages")}
               </CustomText>
             </View>
           )}
@@ -190,7 +188,7 @@ const ChatDetailsScreen: React.FC = () => {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.textInput}
-              placeholder="Type your message..."
+              placeholder={t("chatDetails.type")}
               placeholderTextColor={theme.Colors.gray[400]}
               value={newMessage}
               onChangeText={setNewMessage}

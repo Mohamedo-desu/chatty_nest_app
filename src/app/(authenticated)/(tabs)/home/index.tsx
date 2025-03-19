@@ -12,6 +12,7 @@ import { DEVICE_HEIGHT } from "@/utils/device";
 import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,6 +28,8 @@ const ForYou = () => {
   const { styles } = useStyles(stylesheet);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
+  const { t } = useTranslation();
 
   const { currentUser } = useUserStore();
   // Use posts and actions from our store
@@ -118,7 +121,9 @@ const ForYou = () => {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <CustomText style={styles.emptyText}>No posts!</CustomText>
+            <CustomText style={styles.emptyText}>
+              {t("home.emptyPosts")}
+            </CustomText>
           </View>
         )
       }
