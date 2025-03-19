@@ -9,7 +9,6 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   Cog8ToothIcon,
   HomeIcon,
-  Squares2X2Icon,
 } from "react-native-heroicons/solid";
 import { useStyles } from "react-native-unistyles";
 
@@ -43,15 +42,16 @@ const TabsLayout = () => {
           tabBarBadge: newPosts > 0 ? newPosts : undefined,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="explore"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Squares2X2Icon color={color} size={size} />
           ),
           tabBarLabel: t("tabLayout.explore"),
+          href: null,
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="chats"
         options={{

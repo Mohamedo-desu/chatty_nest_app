@@ -41,10 +41,10 @@ const _layout = () => {
         name="index"
         options={{ title: t("chats.index") }}
       />
-      <MaterialTopTabs.Screen
+      {/* <MaterialTopTabs.Screen
         name="groups"
         options={{ title: t("chats.groups") }}
-      />
+      /> */}
     </MaterialTopTabs>
   );
 };

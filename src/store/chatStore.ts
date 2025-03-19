@@ -15,6 +15,7 @@ export interface ChatItem {
   name?: string | null;
   photo?: string | null;
   lastMessageTime?: string;
+  // Optionally include other properties such as otherUserId and push_tokens if needed.
   lastMessage?: {
     text: string;
     user: { id: string };
@@ -22,6 +23,9 @@ export interface ChatItem {
     received?: boolean;
   } | null;
   unseenCount?: number;
+  // Optional: if you want to store the other user's ID and push tokens
+  otherUserId?: string | null;
+  push_tokens?: string[] | null;
 }
 
 export interface SearchedUser {
@@ -42,7 +46,13 @@ interface ChatState {
   ) => Promise<Message[] | undefined>;
   searchForUsers: (searchPhrase: string) => Promise<void>;
   createOneToOneChat: (otherUser: SearchedUser) => Promise<string | null>;
-  sendMessage: (conversationId: string, message: string) => Promise<void>;
+  sendMessage: (
+    conversationId: string,
+    message: string,
+    other_user_id: string,
+    push_tokens: string[]
+  ) => Promise<any>;
+  updateLastMessage: (conversationId: string, newMsg: Message) => void;
 }
 
 export const useChatStore = create<ChatState>()((set, get) => ({
@@ -50,14 +60,13 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   error: null,
   searchedUsers: [],
 
-  // Fetch all conversations where the current user is a participant.
   fetchChats: async () => {
     const { currentUser } = useUserStore.getState();
     if (!currentUser?.user_id) {
       set({ error: "No authenticated user" });
       return;
     }
-    const uid = currentUser.user_id;
+    const uid: string = currentUser.user_id;
     const { data: convs, error: cerr } = await client
       .from("conversations")
       .select(
@@ -72,34 +81,31 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       set({ chatItems: [] });
       return;
     }
-    const chats = await Promise.all(
-      convs.map(async (conv: any) => {
+    const chats: ChatItem[] = await Promise.all(
+      convs.map(async (conv: any): Promise<ChatItem> => {
         let otherUserId: string | null = null;
-        let name = conv.conversation_name || null;
+        let name: string | null = conv.conversation_name || null;
         let photo: string | null = null;
-
         let pushTokens: string[] | null = null;
         if (
           conv.chat_type === "one_to_one" &&
           Array.isArray(conv.participants)
         ) {
-          // Determine the other participant in a one-to-one chat
-          otherUserId = conv.participants.find((p: string) => p !== uid);
+          otherUserId =
+            conv.participants.find((p: string) => p !== uid) || null;
           if (otherUserId) {
             const { data: userData, error: userError } = await client
               .from("users")
-              .select("display_name, photo_url,push_tokens")
+              .select("display_name, photo_url, push_tokens")
               .eq("user_id", otherUserId)
               .single();
             if (!userError && userData) {
               name = userData.display_name;
-              otherUserId;
               photo = userData.photo_url;
               pushTokens = userData.push_tokens;
             }
           }
         }
-        // Fetch the last message in the conversation.
         const { data: msgData, error: msgError } = await client
           .from("messages")
           .select("content, created_at, sender_id, seen_by, received")
@@ -110,13 +116,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
         if (msgError) {
           console.error("Error fetching last message:", msgError.message);
         }
-        // Count messages not yet seen by the current user.
-        // const { count: unseenCount } = await client
-        //   .from("messages")
-        //   .select("message_id", { count: "exact", head: true })
-        //   .eq("conversation_id", conv.conversation_id)
-        //   .or(`seen_by.is.null,seen_by.not.cs.{${uid}}`);
-
+        const unseenCount = 0;
         return {
           conversation_id: conv.conversation_id,
           name,
@@ -132,15 +132,16 @@ export const useChatStore = create<ChatState>()((set, get) => ({
                 received: msgData.received,
               }
             : null,
-          unseenCount: 0,
+          unseenCount,
         };
       })
     );
     set({ chatItems: chats, error: null });
   },
 
-  // Fetch messages for a given conversation.
-  fetchMessagesForConversation: async (conversationId: string) => {
+  fetchMessagesForConversation: async (
+    conversationId: string
+  ): Promise<Message[] | undefined> => {
     const { data: messages, error: msgError } = await client
       .from("messages")
       .select("content, created_at, sender_id, seen_by, received")
@@ -153,8 +154,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     return messages as Message[];
   },
 
-  // Search for users, and check if a one-to-one conversation already exists with them.
-  searchForUsers: async (searchPhrase: string) => {
+  searchForUsers: async (searchPhrase: string): Promise<void> => {
     if (!searchPhrase || searchPhrase.trim().length === 0) {
       set({ searchedUsers: [] });
       return;
@@ -164,10 +164,10 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       set({ error: "No authenticated user", searchedUsers: [] });
       return;
     }
-    const currentUserId = currentUser.user_id;
+    const currentUserId: string = currentUser.user_id;
     const { data, error } = await client
       .from("users")
-      .select("user_id, display_name, email_address, photo_url,push_tokens")
+      .select("user_id, display_name, email_address, photo_url, push_tokens")
       .or(
         `display_name.ilike.%${searchPhrase}%,user_name.ilike.%${searchPhrase}%`
       )
@@ -178,7 +178,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     }
     const users = data as SearchedUser[];
     const updatedUsers: SearchedUser[] = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user): Promise<SearchedUser> => {
         const { data: convData, error: convError } = await client
           .from("conversations")
           .select("conversation_id")
@@ -194,8 +194,9 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     set({ searchedUsers: updatedUsers, error: null });
   },
 
-  // Create a new one-to-one conversation and add an initial message.
-  createOneToOneChat: async (otherUser: SearchedUser) => {
+  createOneToOneChat: async (
+    otherUser: SearchedUser
+  ): Promise<string | null> => {
     const { currentUser } = useUserStore.getState();
     if (!currentUser || !currentUser.user_id) {
       set({ error: "No authenticated user" });
@@ -213,8 +214,8 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       set({ error: convError?.message || "Failed to create conversation" });
       return null;
     }
-    const conversationId = convData.conversation_id;
-    const initialMessage = `New chat from ${
+    const conversationId: string = convData.conversation_id;
+    const initialMessage: string = `New chat from ${
       currentUser.display_name || "Unknown"
     }`;
     const { error: msgError } = await client.from("messages").insert({
@@ -230,22 +231,17 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     return conversationId;
   },
 
-  // Send a message to a conversation.
   sendMessage: async (
     conversationId: string,
     message: string,
     other_user_id: string,
     push_tokens: string[]
-  ) => {
+  ): Promise<any> => {
     const { currentUser } = useUserStore.getState();
     if (!currentUser || !currentUser.user_id) {
       set({ error: "No authenticated user" });
       return;
     }
-
-    console.log({ push_tokens });
-
-    // Insert the message into the "messages" table.
     const { data, error } = await client
       .from("messages")
       .insert({
@@ -256,7 +252,6 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       })
       .select("*")
       .single();
-
     if (error) {
       set({ error: error.message });
       console.error("Send message error:", error);
@@ -264,35 +259,26 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     } else {
       set({ error: null });
     }
-
-    // If the sender and receiver are the same, don't send a notification.
     if (other_user_id === currentUser.user_id) {
       return data;
     }
-
-    // Check notification settings for the recipient.
     const { data: settings, error: settingsError } = await client
       .from("notification_settings")
       .select("direct_messages_notifications")
       .eq("user_id", other_user_id)
       .maybeSingle();
-
     if (settingsError) {
       console.error("Notification settings error:", settingsError.message);
       return data;
     }
-
-    // If settings don't exist or direct_messages is false, do not send a notification.
     if (!settings || !settings.direct_messages_notifications) {
       return data;
     }
-
-    // Send a push notification if push tokens are available.
     if (Array.isArray(push_tokens) && push_tokens.length > 0) {
-      const messageBody = `${
+      const messageBody: string = `${
         currentUser.display_name || "Someone"
       } sent you a new message.`;
-      const notificationPromises = push_tokens.map((token) => {
+      const notificationPromises = push_tokens.map((token: string) => {
         const notificationMessage = {
           to: token,
           sound: "default",
@@ -302,7 +288,6 @@ export const useChatStore = create<ChatState>()((set, get) => ({
             url: `/(authenticated)/chat_details?conversationId=${conversationId}`,
           },
         };
-
         return fetch("https://exp.host/--/api/v2/push/send", {
           method: "POST",
           headers: {
@@ -313,10 +298,31 @@ export const useChatStore = create<ChatState>()((set, get) => ({
           body: JSON.stringify(notificationMessage),
         });
       });
-
       await Promise.all(notificationPromises);
     }
-
     return data;
+  },
+
+  updateLastMessage: (conversationId: string, newMsg: Message): void => {
+    set((state) => {
+      state.chatItems = state.chatItems.map((item) => {
+        if (item.conversation_id === conversationId) {
+          return {
+            ...item,
+            lastMessage: {
+              text: newMsg.content,
+              user: { id: newMsg.sender_id },
+              seen: newMsg.seen_by
+                ? newMsg.seen_by.includes(item.lastMessage?.user.id ?? "")
+                : false,
+              received: newMsg.received,
+            },
+            lastMessageTime: newMsg.created_at,
+          };
+        }
+        return item;
+      });
+      return state; // Add this line to return the updated state
+    });
   },
 }));

@@ -41,10 +41,10 @@ const _layout = () => {
         name="index"
         options={{ title: t("home.index") }}
       />
-      <MaterialTopTabs.Screen
+      {/* <MaterialTopTabs.Screen
         name="followings"
         options={{ title: t("home.followings") }}
-      />
+      /> */}
     </MaterialTopTabs>
   );
 };

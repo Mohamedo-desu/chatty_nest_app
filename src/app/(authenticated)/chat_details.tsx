@@ -38,7 +38,12 @@ const ChatDetailsScreen: React.FC = () => {
       name: string;
     }>();
 
-  const { fetchMessagesForConversation, sendMessage, error } = useChatStore();
+  const {
+    fetchMessagesForConversation,
+    sendMessage,
+    updateLastMessage,
+    error,
+  } = useChatStore();
   const { currentUser } = useUserStore();
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -80,6 +85,7 @@ const ChatDetailsScreen: React.FC = () => {
         (payload: any) => {
           setMessages((prev) => [...prev, payload.new]);
           flatListRef.current?.scrollToEnd({ animated: true });
+          updateLastMessage(conversationId, payload.new);
         }
       )
       .subscribe();
