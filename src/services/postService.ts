@@ -263,7 +263,7 @@ export const fetchUserPosts = async (
   return data || [];
 };
 
-export const removePost = async (postId: string | number, file: string) => {
+export const removePostItem = async (postId: string | number, file: string) => {
   if (file) {
     deleteStorageFile(file);
   }

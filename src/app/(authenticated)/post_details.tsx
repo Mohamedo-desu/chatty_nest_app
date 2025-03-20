@@ -9,8 +9,8 @@ import { Fonts } from "@/constants/Fonts";
 import {
   createPostComment,
   fetchPostDetails,
-  removePost,
   removePostComment,
+  removePostItem,
 } from "@/services/postService";
 import { getUserData } from "@/services/userService";
 import { usePostStore } from "@/store/postStore";
@@ -60,7 +60,7 @@ const PostDetails: React.FC = () => {
   const inputRef = useRef<TextInput>(null);
   const commentRef = useRef<string>("");
 
-  const { updatePost, setPosts, posts } = usePostStore();
+  const { updatePost, setPosts, posts, removePost } = usePostStore();
   const { currentUser } = useUserStore();
 
   const { t } = useTranslation();
@@ -185,16 +185,41 @@ const PostDetails: React.FC = () => {
     };
   }, [getPostDetails, handleNewCommentEvent, postId]);
 
+  const handleDeletePostEvent = async (payload: any) => {
+    if (payload.eventType === "DELETE" && payload.old.id) {
+      removePost(payload.old.id);
+      router.back();
+    }
+  };
+
+  useEffect(() => {
+    const postChannel = client
+      .channel(`postItem-${postId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+        },
+        handleDeletePostEvent
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(postChannel);
+    };
+  }, [handleDeletePostEvent]);
+
   const onDeletePost = async () => {
     try {
       if (!post) return;
 
-      const res = await removePost(post.id, post?.file);
+      const res = await removePostItem(post.id, post?.file);
       if (res) {
         let updatedPosts = posts.filter((item) => item.id !== post.id);
         setPosts(updatedPosts);
         showToast("success", "Success", "Deleted successfully!");
-        router.back();
       }
     } catch (error: any) {
       showToast("error", "Error", error.message);
