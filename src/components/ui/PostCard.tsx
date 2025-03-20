@@ -118,7 +118,6 @@ const PostCard: FC<PostCardProps> = ({
   const player = isVideo
     ? useVideoPlayer(item.file, (playerInstance: any) => {
         playerInstance.loop = true;
-        playerInstance.play();
         playerInstance.generateThumbnailsAsync(0);
       })
     : null;
@@ -289,7 +288,7 @@ const PostCard: FC<PostCardProps> = ({
         </View>
         <View style={styles.footer}>
           <View style={styles.footerButton}>
-            <TouchableOpacity onPress={handleLike}>
+            <TouchableOpacity onPress={handleLike} hitSlop={10}>
               <HeartIcon
                 size={RFValue(22)}
                 color={liked ? theme.Colors.primary : theme.Colors.gray[500]}
@@ -303,7 +302,7 @@ const PostCard: FC<PostCardProps> = ({
             />
           </View>
           <View style={styles.footerButton}>
-            <TouchableOpacity onPress={handleOpenPostDetails}>
+            <TouchableOpacity onPress={handleOpenPostDetails} hitSlop={10}>
               <ChatBubbleBottomCenterTextIcon
                 size={RFValue(22)}
                 color={theme.Colors.gray[500]}
@@ -317,7 +316,7 @@ const PostCard: FC<PostCardProps> = ({
             />
           </View>
           <View style={styles.footerButton}>
-            <TouchableOpacity onPress={handleShare}>
+            <TouchableOpacity onPress={handleShare} hitSlop={10}>
               {loading ? (
                 <ActivityIndicator size={"small"} color={Colors.primary} />
               ) : (

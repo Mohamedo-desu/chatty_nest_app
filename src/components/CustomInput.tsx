@@ -95,6 +95,7 @@ const stylesheet = createStyleSheet((theme) => ({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: theme.Colors.gray[50],
     borderRadius: theme.border.xs,
     borderWidth: 1,

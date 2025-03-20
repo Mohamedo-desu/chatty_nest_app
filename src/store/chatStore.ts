@@ -168,9 +168,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     const { data, error } = await client
       .from("users")
       .select("user_id, display_name, email_address, photo_url, push_tokens")
-      .or(
-        `display_name.ilike.%${searchPhrase}%,user_name.ilike.%${searchPhrase}%`
-      )
+      .ilike("display_name", `${searchPhrase}%`)
       .neq("user_id", currentUserId);
     if (error) {
       set({ error: error.message, searchedUsers: [] });

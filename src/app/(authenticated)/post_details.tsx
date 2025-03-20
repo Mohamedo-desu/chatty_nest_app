@@ -63,7 +63,7 @@ const PostDetails: React.FC = () => {
   const { updatePost, setPosts, posts } = usePostStore();
   const { currentUser } = useUserStore();
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   // When the local post state changes, update the store independently.
   useEffect(() => {
@@ -110,7 +110,7 @@ const PostDetails: React.FC = () => {
 
       inputRef.current?.clear();
       commentRef.current = "";
-      showToast("success", "Success", "Comment added successfully!");
+      showToast("success", "Success", "Added successfully!");
       // Optionally, re-fetch the post details here.
     } catch (error: any) {
       console.error(error);
@@ -130,7 +130,7 @@ const PostDetails: React.FC = () => {
             (item) => item.id !== comment.id
           );
           setPost({ ...post, post_comments: updatedComments });
-          showToast("success", "Success", "Comment deleted successfully!");
+          showToast("success", "Success", "Deleted successfully!");
         }
       } catch (error: any) {
         console.error(error);
@@ -193,7 +193,7 @@ const PostDetails: React.FC = () => {
       if (res) {
         let updatedPosts = posts.filter((item) => item.id !== post.id);
         setPosts(updatedPosts);
-        showToast("success", "Success", "Post deleted successfully!");
+        showToast("success", "Success", "Deleted successfully!");
         router.back();
       }
     } catch (error: any) {
@@ -202,11 +202,11 @@ const PostDetails: React.FC = () => {
   };
 
   const onEditPost = async () => {
-    router.back();
     router.push({
       pathname: "/add_post",
       params: {
         postId,
+        postItem: JSON.stringify(post),
       },
     });
   };

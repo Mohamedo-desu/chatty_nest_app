@@ -31,12 +31,12 @@ serve(async (req: Request) => {
       }`
     );
 
-    const { data, error } = await supabase.from("users").insert({
+    const { data, error } = await supabase.from("users").upsert({
       user_id: id,
       email_address: email,
       display_name: first_name || displayName,
       photo_url: image_url,
-      user_name: `@${displayName.trim().toLowerCase()}`,
+      user_name: first_name || displayName,
       user_bio: "Hey there! i am using chatty nest",
     });
 

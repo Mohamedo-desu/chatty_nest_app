@@ -15,6 +15,7 @@ interface PostActions {
   setPosts: (newPostsArray: Post[]) => void;
   getPost: (id: string | number) => Post | undefined;
   updatePost: (updatedPost: Post) => void;
+  removePost: (id: string | number) => void;
   updateInPostScreen: (inScreen: boolean) => void;
   recalcNewPosts: () => void;
 }
@@ -63,6 +64,11 @@ export const usePostStore = create<PostState & PostActions>()((set, get) => ({
       // Add new post if it doesn't exist yet
       set({ posts: [...posts, { ...updatedPost, hasSeen: true }] });
     }
+  },
+  removePost: (id: string | number) => {
+    // Remove the post with the given id.
+    const posts = get().posts;
+    set({ posts: posts.filter((post) => post.id !== id) });
   },
   updateInPostScreen: (inScreen: boolean) => {
     if (inScreen) {

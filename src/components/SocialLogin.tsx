@@ -1,35 +1,35 @@
-import { useOAuth } from "@clerk/clerk-expo";
-import * as Linking from "expo-linking";
-import React, { FC, useEffect } from "react";
+import { useSSO } from "@clerk/clerk-expo";
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import React, { FC } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
 import { moderateScale } from "react-native-size-matters";
-
 import { createStyleSheet, useStyles } from "react-native-unistyles";
-import Icon from "./Icon";
+
+export const useWarmUpBrowser = () => {
+  React.useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+};
+
+WebBrowser.maybeCompleteAuthSession();
 
 const SocialLogin: FC = () => {
-  // Generate a redirect URL based on the app's scheme
-  const redirectUrl = Linking.createURL("/");
+  useWarmUpBrowser();
+  const { startSSOFlow } = useSSO();
 
-  // Google OAuth flow
-  const { startOAuthFlow: startGoogleOAuthFlow } = useOAuth({
-    strategy: "oauth_google",
-    redirectUrl,
-  });
-
-  // Apple OAuth flow
-  const { startOAuthFlow: startAppleOAuthFlow } = useOAuth({
-    strategy: "oauth_apple",
-    redirectUrl,
-  });
-
-  const { styles, theme } = useStyles(stylesheet);
+  const { styles } = useStyles(stylesheet);
 
   // Handle Google OAuth
   const handleGoogleAuth = async () => {
     try {
-      const { createdSessionId, setActive } = await startGoogleOAuthFlow();
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+        redirectUrl: AuthSession.makeRedirectUri(),
+      });
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
@@ -38,32 +38,6 @@ const SocialLogin: FC = () => {
       console.error("Google OAuth Error:", error);
     }
   };
-
-  // Handle Apple OAuth
-  const handleAppleAuth = async () => {
-    try {
-      const { createdSessionId, setActive } = await startAppleOAuthFlow();
-
-      if (createdSessionId) {
-        setActive!({ session: createdSessionId });
-      }
-    } catch (error) {
-      console.error("Apple OAuth Error:", error);
-    }
-  };
-
-  // Listen for incoming deep links
-  useEffect(() => {
-    const handleDeepLink = async (event: { url: string }) => {
-      const url = event.url;
-    };
-
-    const subscription = Linking.addEventListener("url", handleDeepLink);
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
 
   return (
     <View style={styles.socialContainer}>
@@ -76,20 +50,6 @@ const SocialLogin: FC = () => {
         <Image
           source={require("@/assets/images/google.png")}
           style={styles.gImg}
-        />
-      </TouchableOpacity>
-
-      {/* Apple OAuth Button */}
-      <TouchableOpacity
-        style={styles.iconContainer}
-        activeOpacity={0.8}
-        onPress={handleAppleAuth}
-      >
-        <Icon
-          iconFamily="Ionicons"
-          name="logo-apple"
-          size={RFValue(18)}
-          color={theme.Colors.typography}
         />
       </TouchableOpacity>
     </View>

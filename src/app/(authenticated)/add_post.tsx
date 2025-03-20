@@ -4,7 +4,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { showToast } from "@/components/toast/ShowToast";
 import { Colors } from "@/constants/Colors";
 import { uploadMedia } from "@/services/mediaServices";
-import { deleteStorageFile, fetchPostDetails } from "@/services/postService";
+import { deleteStorageFile } from "@/services/postService";
 import { usePostStore } from "@/store/postStore";
 import { useUserStore } from "@/store/userStore";
 import { client } from "@/supabase/config";
@@ -54,16 +54,15 @@ interface PostBodyData {
   type: "public" | "private";
 }
 
-// Helper function to delete a file from Supabase storage.
-// It extracts the relative file path from a full URL and calls remove on the "uploads" bucket.
-
 const AddNewPostScreen: React.FC = () => {
   const { styles, theme } = useStyles(stylesheet);
   const { currentUser } = useUserStore();
   const { updatePost } = usePostStore();
   const [post, setPost] = useState<Post | null>(null);
 
-  const { postId } = useLocalSearchParams<{ postId?: string }>();
+  // Retrieve postItem from local search params (should be a JSON string if editing)
+  const { postItem } = useLocalSearchParams<{ postItem?: string }>();
+
   const { t } = useTranslation();
 
   // Refs for storing post body and editor instance
@@ -79,7 +78,6 @@ const AddNewPostScreen: React.FC = () => {
   const player = useVideoPlayer(videoUri, (playerInstance) => {
     if (videoUri) {
       playerInstance.loop = true;
-      playerInstance.play();
     }
   });
 
@@ -102,6 +100,40 @@ const AddNewPostScreen: React.FC = () => {
       showToast("error", "Error", error.message);
     }
   }, []);
+
+  // Parse postItem and set it to the post state
+  useEffect(() => {
+    if (postItem) {
+      try {
+        const parsedPost = JSON.parse(postItem);
+        setPost(parsedPost);
+      } catch (error) {
+        console.error("Error parsing postItem:", error);
+      }
+    }
+  }, [postItem]);
+
+  // When post is loaded/updated (for editing), update fields accordingly.
+  useEffect(() => {
+    if (post && post.id) {
+      const fileUri = post.file;
+      const fileType: "video" | "image" = fileUri.includes("videos")
+        ? "video"
+        : "image";
+      const fileName = fileUri.split("/").pop() ?? "unknown_file";
+
+      setFile({ uri: fileUri, type: fileType, fileName });
+      bodyRef.current = post.body;
+      setPostType(post.type);
+
+      // Delay setting content to allow the editor to mount.
+      const timeoutId = setTimeout(() => {
+        editorRef.current?.setContentHTML(post.body);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [post]);
 
   // Submit post creation or update
   const onSubmit = useCallback(async (): Promise<void> => {
@@ -143,7 +175,7 @@ const AddNewPostScreen: React.FC = () => {
         type: postType,
       };
 
-      if (post?.id) {
+      if (post && post.id) {
         bodyData.id = post.id;
       }
 
@@ -165,12 +197,12 @@ const AddNewPostScreen: React.FC = () => {
         showToast(
           "success",
           t("addPost.submitSuccessTitle"),
-          post?.id
+          post && post.id
             ? t("addPost.submitSuccessUpdateDesc")
             : t("addPost.submitSuccessAddDesc")
         );
 
-        if (post?.id) {
+        if (post && post.id) {
           // Update the post in store if it's an update.
           const updatedPost: Post = {
             ...post,
@@ -195,46 +227,6 @@ const AddNewPostScreen: React.FC = () => {
       setLoading(false);
     }
   }, [currentUser.user_id, file, post, postType, t, updatePost]);
-
-  // Fetch post details if editing an existing post.
-  const getPostDetails = useCallback(async (): Promise<void> => {
-    try {
-      const res = await fetchPostDetails(postId as string);
-      if (res) {
-        setPost(res);
-      }
-    } catch (error) {
-      console.error("Error fetching post details:", error);
-    }
-  }, [postId]);
-
-  // Update fields when a post is loaded (for editing).
-  useEffect(() => {
-    if (post && post.id) {
-      const fileUri = post.file;
-      const fileType: "video" | "image" = fileUri.includes("videos")
-        ? "video"
-        : "image";
-      const fileName = fileUri.split("/").pop() ?? "unknown_file";
-
-      setFile({ uri: fileUri, type: fileType, fileName });
-      bodyRef.current = post.body;
-      setPostType(post.type);
-
-      // Delay setting content to allow the editor to mount.
-      const timeoutId = setTimeout(() => {
-        editorRef.current?.setContentHTML(post.body);
-      }, 1000);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [post]);
-
-  useEffect(() => {
-    if (postId) {
-      getPostDetails();
-    }
-  }, [postId, getPostDetails]);
 
   return (
     <ScrollView
@@ -266,7 +258,7 @@ const AddNewPostScreen: React.FC = () => {
           }}
         />
       </View>
-      {file && (
+      {file?.uri && (
         <View style={styles.file}>
           {file.type === "video" ? (
             <VideoView
@@ -275,13 +267,13 @@ const AddNewPostScreen: React.FC = () => {
               allowsFullscreen
               allowsPictureInPicture
             />
-          ) : (
+          ) : file.type === "image" ? (
             <Image
               source={{ uri: file.uri }}
               contentFit="cover"
               style={{ flex: 1 }}
             />
-          )}
+          ) : null}
           <Pressable
             style={styles.closeIcon}
             hitSlop={10}

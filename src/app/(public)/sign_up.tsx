@@ -12,10 +12,8 @@ import { useSignUp } from "@clerk/clerk-expo";
 import { Formik } from "formik";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
-import { moderateScale } from "react-native-size-matters";
 import { createStyleSheet, useStyles } from "react-native-unistyles";
 import * as Yup from "yup";
 
@@ -119,11 +117,10 @@ const SignUpScreen = () => {
 
   return (
     <>
-      <KeyboardAwareScrollView
+      <ScrollView
         keyboardShouldPersistTaps="handled"
         style={styles.screen}
         contentContainerStyle={styles.contentContainer}
-        keyboardDismissMode="on-drag"
       >
         <AuthHeader
           title={t("signUp.title")}
@@ -132,10 +129,10 @@ const SignUpScreen = () => {
         />
         <Formik
           initialValues={{
-            email: "omkahub@gmail.com",
-            password: "Ug4586@#",
-            confirmNewPassword: "Ug4586@#",
-            displayName: "Mohamed Abdikafi",
+            email: "",
+            password: "",
+            confirmNewPassword: "",
+            displayName: "",
           }}
           validationSchema={SignUpValidationSchema}
           onSubmit={handleSignUpEmail}
@@ -209,29 +206,37 @@ const SignUpScreen = () => {
         <PrivacyTerms />
 
         {/* Verification Modal */}
-        <Modal visible={verifying} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <CustomText style={styles.modalTitle}>
-                Verify Your Email
-              </CustomText>
-              <CustomInput
-                placeholder="Enter verification code"
-                value={code}
-                handleChange={setCode}
-                keyboardType="numeric"
-                rightIcon="key"
-                style={styles.input}
-              />
-              <CustomButton
-                text="Verify"
-                onPress={handleVerify}
-                loading={loading}
-              />
-            </View>
+      </ScrollView>
+      <Modal
+        visible={verifying}
+        transparent
+        animationType="fade"
+        onDismiss={() => setVerifying(false)}
+        onRequestClose={() => setVerifying(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setVerifying(false)}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContainer}>
+            <CustomText style={styles.modalTitle}>Verify Your Email</CustomText>
+            <CustomInput
+              placeholder="Enter verification code"
+              value={code}
+              handleChange={setCode}
+              keyboardType="numeric"
+              rightIcon="key"
+              style={styles.input}
+            />
+            <CustomButton
+              text="Verify"
+              onPress={handleVerify}
+              loading={loading}
+            />
           </View>
-        </Modal>
-      </KeyboardAwareScrollView>
+        </TouchableOpacity>
+      </Modal>
     </>
   );
 };
@@ -240,7 +245,6 @@ export default SignUpScreen;
 
 const stylesheet = createStyleSheet((theme) => ({
   screen: {
-    flex: 1,
     backgroundColor: theme.Colors.background,
   },
   contentContainer: {
@@ -278,6 +282,5 @@ const stylesheet = createStyleSheet((theme) => ({
   },
   input: {
     width: "100%",
-    marginVertical: moderateScale(15),
   },
 }));

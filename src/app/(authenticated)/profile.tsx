@@ -1,5 +1,4 @@
 import CustomText from "@/components/CustomText";
-import UserMedia from "@/components/screens/UserMedia";
 import UserPosts from "@/components/screens/UserPosts";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
@@ -30,14 +29,12 @@ const Header = () => {
       <ImageBackground
         style={styles.imageBackground}
         source={{
-          uri:
-            currentUser.cover_url ||
-            "https://static.vecteezy.com/system/resources/thumbnails/049/855/259/small_2x/nature-background-high-resolution-wallpaper-for-a-serene-and-stunning-view-photo.jpg",
+          uri: currentUser.cover_url,
         }}
         contentFit="cover"
       >
         <Image
-          source={{ uri: currentUser.photo_url || "https://i.pravatar.cc/200" }}
+          source={{ uri: currentUser.photo_url }}
           contentFit="cover"
           style={styles.profileImage}
         />
@@ -107,6 +104,7 @@ const tabBar = (props) => {
       pressColor="transparent"
       labelStyle={styles.tabBarLabelStyle}
       style={styles.tabBarStyle}
+      swipeEnabled={false}
     />
   );
 };
@@ -124,9 +122,6 @@ const ProfileScreen = () => {
     >
       <Tabs.Tab name="Posts">
         <UserPosts />
-      </Tabs.Tab>
-      <Tabs.Tab name="Media">
-        <UserMedia />
       </Tabs.Tab>
     </Tabs.Container>
   );

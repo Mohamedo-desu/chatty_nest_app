@@ -1,5 +1,6 @@
 // ChatDetailsScreen.tsx
 import CustomText from "@/components/CustomText";
+import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { useChatStore } from "@/store/chatStore";
 import { useUserStore } from "@/store/userStore";
@@ -118,7 +119,12 @@ const ChatDetailsScreen: React.FC = () => {
         <Text style={[styles.messageText, isSender && styles.senderText]}>
           {item.content}
         </Text>
-        <Text style={styles.timestamp}>
+        <Text
+          style={[
+            styles.timestamp,
+            { color: isSender ? Colors.white : theme.Colors.gray[400] },
+          ]}
+        >
           {formatRelativeTime(item.created_at, i18n)}
         </Text>
       </View>
@@ -241,7 +247,6 @@ const stylesheet = createStyleSheet((theme, rt) => ({
   timestamp: {
     fontSize: RFValue(10),
     fontFamily: Fonts.Regular,
-    color: theme.Colors.gray[300],
     marginTop: moderateScale(4),
     textAlign: "right",
   },
@@ -256,7 +261,7 @@ const stylesheet = createStyleSheet((theme, rt) => ({
     borderTopWidth: 1,
     borderTopColor: theme.Colors.gray[100],
     paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(8),
+    paddingVertical: moderateScale(10),
   },
   textInput: {
     flex: 1,

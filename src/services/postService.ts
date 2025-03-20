@@ -1,25 +1,20 @@
 import { client } from "@/supabase/config";
 
-export const fetchPosts = async (limit = 10) => {
+export const fetchPosts = async (offset = 0, limit = 10) => {
   const { data, error } = await client
-    .from("posts")
+    .from("randomized_posts")
     .select(
       `*,
-        user:users (user_id, display_name, user_name, photo_url,push_tokens),
-        post_likes (*),
-        post_comments (count)
-      `
+       user:users (user_id, display_name, user_name, photo_url, push_tokens),
+       post_likes (*),
+       post_comments (count)`
     )
-    .eq("type", "public")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (error) {
     throw error;
   }
-  if (data) {
-    return data;
-  }
+  return data;
 };
 
 export const createPostLike = async (postLike, notification) => {
@@ -28,7 +23,7 @@ export const createPostLike = async (postLike, notification) => {
     .from("post_likes")
     .insert(postLike)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -127,7 +122,7 @@ export const getPostLikes = async (postId: string, userId: string) => {
       .select("*")
       .eq("user_id", userId)
       .eq("post_id", postId)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     if (data) return data;
   } catch (error) {
@@ -141,7 +136,7 @@ export const getPostComments = async (postId: string, userId: string) => {
       .select("*")
       .eq("user_id", userId)
       .eq("post_id", postId)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     if (data) return data;
   } catch (error) {
@@ -161,7 +156,7 @@ export const fetchPostDetails = async (postId: string) => {
     )
     .eq("id", postId)
     .order("created_at", { ascending: false, referencedTable: "post_comments" })
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -177,7 +172,7 @@ export const createPostComment = async (postComment, notification) => {
     .from("post_comments")
     .insert(postComment)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -245,27 +240,29 @@ export const createPostComment = async (postComment, notification) => {
   return data;
 };
 
-export const fetchUserPosts = async (limit = 10, userId: string) => {
+export const fetchUserPosts = async (
+  offset = 0,
+  limit = 10,
+  userId: string
+) => {
   const { data, error } = await client
     .from("posts")
     .select(
       `*,
-        user:users (user_id, display_name, user_name, photo_url,push_tokens),
+        user:users (user_id, display_name, user_name, photo_url, push_tokens),
         post_likes (*),
-        post_comments (count)
-      `
+        post_comments (count)`
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (error) {
     throw error;
   }
-  if (data) {
-    return data;
-  }
+  return data || [];
 };
+
 export const removePost = async (postId: string | number, file: string) => {
   if (file) {
     deleteStorageFile(file);
@@ -294,5 +291,6 @@ export const deleteStorageFile = async (fileUrl: string): Promise<void> => {
   const { error } = await client.storage.from("uploads").remove([removePath]);
   if (error) {
     console.error("Error deleting storage file:", error);
+    throw error;
   }
 };
